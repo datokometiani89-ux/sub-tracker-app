@@ -35,6 +35,9 @@
   ST.FREE_LIMIT = 5;
   ST.isPro = () => !!ST.state.pro.active;
   ST.activeSubs = () => ST.state.subs.filter(s=>s.status==="active");
+  // free-tier limit counts paused too, else pausing bypasses the cap
+  ST.atFreeLimit = () => !ST.isPro() &&
+    ST.state.subs.filter(s=>s.status!=="cancelled").length >= ST.FREE_LIMIT;
   ST.subById = id => ST.state.subs.find(s=>s.id===id);
 
   ST.newSub = (o) => ({

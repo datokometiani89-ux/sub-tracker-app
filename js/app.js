@@ -13,9 +13,13 @@
     const route = location.hash || "#/";
     const showTabs = ST.state.meta.onboarded && ["#/","#/insights","#/calendar","#/settings"].includes(route);
     app.innerHTML = html + (showTabs ? tabbar(route) : "");
-    window.scrollTo(0,0);
+    if (!ST._keepScroll) window.scrollTo(0,0);   // in-place re-renders keep position
+    ST._keepScroll = false;
     if (onMount) onMount(app);
   };
+
+  /* back that can't dead-end on a deep link */
+  ST.back = () => { if (history.length > 1) history.back(); else location.hash = "#/"; };
 
   const tabbar = (route) => `
     <nav class="tabbar">${TABS.map(([href,ic,key]) => `
@@ -41,7 +45,10 @@
   ST.askNotifPermission = () => {
     if (!("Notification" in window)) return;
     if (Notification.permission === "default") {
-      setTimeout(()=>Notification.requestPermission().catch(()=>{}), 600);
+      setTimeout(()=>Notification.requestPermission().then(p => {
+        // fire today's reminders immediately once granted, not on next launch
+        if (p === "granted") { ST.state.meta.lastNotifCheck = null; ST.checkReminders(); }
+      }).catch(()=>{}), 600);
     }
   };
   ST.checkReminders = () => {
@@ -51,11 +58,12 @@
     ST.state.meta.lastNotifCheck = today; ST.save();
     const r = ST.state.settings.reminders;
     ST.activeSubs().forEach(s => {
-      const d = ST.daysUntil(s.trial.isTrial && s.trial.endsAt ? s.trial.endsAt : s.nextBilling);
+      const due = s.trial.isTrial && s.trial.endsAt ? s.trial.endsAt : s.nextBilling;
+      const d = ST.daysUntil(due);
       const fire = (d===0&&r.dayOf)||(d===1&&r.d1)||(d===3&&r.d3)||(d===7&&r.d7)||(s.trial.isTrial&&(d===1||d===3));
       if (!fire) return;
       try { new Notification("SubTrack", { body: ST.t("notifBody", {
-        name:s.name, when:ST.whenLabel(s.nextBilling), price:ST.fmtMoney(s.price)}) }); } catch(e){}
+        name:s.name, when:ST.whenLabel(due), price:ST.fmtMoney(s.price,{cur:s.currency})}) }); } catch(e){}
     });
   };
 

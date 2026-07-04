@@ -52,6 +52,12 @@
     let changed = false;
     ST.state.subs.forEach(s => {
       if (s.status!=="active") return;
+      // trial that already ended converts to a paid sub
+      if (s.trial.isTrial && s.trial.endsAt && s.trial.endsAt < t) {
+        s.trial.isTrial = false;
+        if (s.trial.priceAfter) s.price = s.trial.priceAfter;
+        changed = true;
+      }
       const anchor = Number((s.startedAt||s.nextBilling).split("-")[2]);
       let guard = 0;
       while (s.nextBilling < t && guard++ < 60) {

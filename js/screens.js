@@ -185,9 +185,14 @@
       </div>
     `, root => {
       root.querySelectorAll("[data-seg]").forEach(b => b.onclick = () => {
-        ST._homeYearly = b.dataset.seg==="y"; ST.render();
+        ST._homeYearly = b.dataset.seg==="y"; ST._keepScroll=true; ST.render();
       });
     });
+  };
+
+  const cycLabel = (c) => {
+    const base = c.unit==="year"?t("year"):c.unit==="week"?t("week"):c.n===3?t("months3"):t("month");
+    return (c.n===1 || (c.unit==="month" && c.n===3)) ? base : base+" ×"+c.n;
   };
 
   const subCard = (s) => {
@@ -195,7 +200,7 @@
     const soon = days<=3;
     const badge = s.trial.isTrial ? `<span class="badge trial">${t("trialBadge")}</span>` :
                   s.status==="paused" ? `<span class="badge paused">${t("pausedBadge")}</span>` : "";
-    const cyc = s.cycle.unit==="year"?t("year"):s.cycle.unit==="week"?t("week"):s.cycle.n===3?t("months3"):t("month");
+    const cyc = cycLabel(s.cycle);
     return `<button class="subcard ${s.status==='paused'?'dim':''}" onclick="location.hash='#/sub/${s.id}'">
       ${ST.tileFor(s)}
       <span style="flex:1">
@@ -233,7 +238,7 @@
 
   /* ============ ADD ============ */
   ST.screens.add = () => {
-    if (!ST.isPro() && ST.activeSubs().length >= ST.FREE_LIMIT) { location.hash="#/pro"; return; }
+    if (ST.atFreeLimit()) { location.hash="#/pro"; return; }
     let q = "";
     const list = () => {
       const match = q ? ST.PRESETS.filter(p=>p.name.toLowerCase().includes(q)) :
@@ -244,7 +249,7 @@
     };
     ST.mount(`
       <div class="screen">
-        <button class="back" onclick="history.back()">${icon("chevL")}${t("back")}</button>
+        <button class="back" onclick="ST.back()">${icon("chevL")}${t("back")}</button>
         <div class="hdr" style="padding-top:8px"><h1>${t("add")}</h1></div>
         <div class="searchbox">${icon("search")}<input id="q" placeholder="${t("search")}" autocomplete="off"></div>
         <div class="pregrid" id="grid">${list()}</div>
@@ -291,7 +296,7 @@
           price, currency: w.querySelector("#pcur").value,
           nextBilling: w.querySelector("#pd").value || ST.todayISO(),
           cycle:cyc,
-          trial: isTrial ? {isTrial:true, endsAt:w.querySelector("#pte").value, priceAfter:price} : {isTrial:false,endsAt:null,priceAfter:null},
+          trial: isTrial ? {isTrial:true, endsAt:w.querySelector("#pte").value || ST.addCycle(ST.todayISO(),{unit:"week",n:1}), priceAfter:price} : {isTrial:false,endsAt:null,priceAfter:null},
           priceHistory:[{date:ST.todayISO(), price}],
         }));
         ST.save(); ST.closeSheets(); ST.toast(t("added"));
@@ -334,11 +339,11 @@
   };
 
   ST.screens["add/custom"] = () => {
-    if (!ST.isPro() && ST.activeSubs().length >= ST.FREE_LIMIT) { location.hash="#/pro"; return; }
+    if (ST.atFreeLimit()) { location.hash="#/pro"; return; }
     let cyc={unit:"month",n:1}, cat="other", isTrial=false;
     ST.mount(`
       <div class="screen">
-        <button class="back" onclick="history.back()">${icon("chevL")}${t("back")}</button>
+        <button class="back" onclick="ST.back()">${icon("chevL")}${t("back")}</button>
         <div class="hdr" style="padding-top:8px"><h1>${t("addCustom").replace("+ ","")}</h1></div>
         <div class="form">
           <div><label>${t("name")}</label><input id="cn" placeholder="Gym, rent, hosting…"></div>
@@ -382,7 +387,7 @@
           currency: root.querySelector("#ccur").value,
           nextBilling: root.querySelector("#cd").value || ST.todayISO(),
           cycle:cyc, notes: root.querySelector("#cno").value,
-          trial: isTrial ? {isTrial:true, endsAt:root.querySelector("#cte").value, priceAfter:price} : {isTrial:false,endsAt:null,priceAfter:null},
+          trial: isTrial ? {isTrial:true, endsAt:root.querySelector("#cte").value || ST.addCycle(ST.todayISO(),{unit:"week",n:1}), priceAfter:price} : {isTrial:false,endsAt:null,priceAfter:null},
           priceHistory:[{date:ST.todayISO(), price}],
         }));
         ST.save(); ST.toast(t("added"));
@@ -398,11 +403,11 @@
     if (!s) { location.hash="#/"; return; }
     const preset = s.presetId ? ST.preset(s.presetId) : null;
     const spent = ST.spentOn(s);
-    const cyc = s.cycle.unit==="year"?t("year"):s.cycle.unit==="week"?t("week"):s.cycle.n===3?t("months3"):t("month");
+    const cyc = cycLabel(s.cycle);
 
     ST.mount(`
       <div class="screen">
-        <button class="back" onclick="history.back()">${icon("chevL")}${t("back")}</button>
+        <button class="back" onclick="ST.back()">${icon("chevL")}${t("back")}</button>
         <div class="dhead">
           ${ST.tileFor(s)}
           <h2>${esc(s.name)}</h2>
@@ -509,7 +514,7 @@
     const saved = ST.savedTotal();
     ST.mount(`
       <div class="screen">
-        <button class="back" onclick="history.back()">${icon("chevL")}${t("back")}</button>
+        <button class="back" onclick="ST.back()">${icon("chevL")}${t("back")}</button>
         <div class="hdr" style="padding-top:8px"><h1>${t("cancelledArchive")}</h1></div>
         <div class="inscard"><div class="l">${t("savedSoFar")}</div>
           <div class="big lime">${ST.fmtMoney(saved.total,{round:1})}</div>
@@ -665,7 +670,7 @@
         let [yy,mm]=ST._calYM; mm++; if(mm>11){mm=0;yy++;} ST._calYM=[yy,mm]; ST._calSel=null; ST.render(); };
       root.querySelector(".calgrid").addEventListener("click", e => {
         const b = e.target.closest("[data-d]"); if(!b) return;
-        ST._calSel = b.dataset.d; ST.render();
+        ST._calSel = b.dataset.d; ST._keepScroll=true; ST.render();
       });
     });
   };
@@ -805,7 +810,7 @@
             if (r[0] && r[0].toLowerCase()==="name") continue;               // header
             const [name,price,currency,unit,cn,nextBilling,category,status,startedAt,notes] = r;
             if (!name || !parseFloat(price)) continue;
-            if (!ST.isPro() && ST.activeSubs().length >= ST.FREE_LIMIT) break; // free cap
+            if (ST.atFreeLimit()) break; // free cap
             ST.state.subs.push(ST.newSub({
               name, price:parseFloat(price),
               currency: ST.CURRENCIES.includes(currency) ? currency : ST.state.settings.currency,
@@ -834,7 +839,7 @@
   ST.screens.pro = () => {
     ST.mount(`
       <div class="screen">
-        <button class="back" onclick="history.back()">${icon("chevL")}${t("back")}</button>
+        <button class="back" onclick="ST.back()">${icon("chevL")}${t("back")}</button>
         <div class="paywall">
           <div class="mark">${icon("sparkles")}</div>
           <h2>${t("pwTitle")}</h2>
