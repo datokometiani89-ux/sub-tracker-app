@@ -12,6 +12,7 @@
       reminders: { d7:false, d3:true, d1:true, dayOf:true },
     },
     subs: [],       // see SPEC.md data model
+    fx: { rates:null, fetchedAt:null },   // USD-based rates from open.er-api.com
     pro: { active:false, plan:null, since:null },
     meta: { installedAt: new Date().toISOString(), onboarded:false, lastNotifCheck:null },
   });
@@ -38,7 +39,7 @@
 
   ST.newSub = (o) => ({
     id: ST.uuid(), presetId:null, name:"", category:"other",
-    color:"#5A5A60", price:0, currency:ST.state.settings.currency,
+    color:"#5A5A60", icon:null, price:0, currency:ST.state.settings.currency,
     cycle:{unit:"month",n:1},
     nextBilling: ST.todayISO(), startedAt: ST.todayISO(),
     trial:{isTrial:false, endsAt:null, priceAfter:null},

@@ -157,6 +157,7 @@ input[type=date]{color-scheme:dark}
   padding:15px;border-radius:16px;letter-spacing:-.2px}
 .cta:disabled{opacity:.35}
 .cta.ghost{background:var(--card2);color:var(--txt);border:0.5px solid var(--line2);font-weight:500}
+.cta svg{width:18px;height:18px;vertical-align:-4px;margin-right:6px}
 
 /* detail */
 .dhead{display:flex;flex-direction:column;align-items:center;padding:10px 22px 0;gap:10px}
@@ -263,6 +264,23 @@ input[type=date]{color-scheme:dark}
 .curgrid button{padding:10px 16px;border-radius:var(--r-pill);background:var(--card2);
   border:0.5px solid var(--line2);font-size:14px;color:var(--mut);font-weight:500}
 .curgrid button.on{background:var(--lime);color:var(--lime-ink);border-color:var(--lime);font-weight:700}
+
+/* icon + color pickers */
+.iconrow{display:flex;flex-wrap:wrap;gap:8px}
+.iconrow button{width:40px;height:40px;border-radius:12px;background:var(--card2);
+  border:0.5px solid var(--line2);display:flex;align-items:center;justify-content:center;color:var(--mut)}
+.iconrow button svg{width:19px;height:19px}
+.iconrow button.on{border-color:var(--lime);color:var(--txt);background:#131507}
+.swatches{display:flex;flex-wrap:wrap;gap:10px}
+.swatches button{width:28px;height:28px;border-radius:50%;border:none}
+.swatches button.on{outline:2px solid var(--lime);outline-offset:2px}
+.curwrap{display:flex;gap:10px}
+.curwrap .pricebox{flex:1}
+.curwrap select{width:96px;flex:none}
+.curlock{position:relative}
+.curlock select{pointer-events:none;opacity:.55}
+.curlock .lk{position:absolute;right:8px;top:50%;transform:translateY(-50%);color:var(--lime)}
+.curlock .lk svg{width:14px;height:14px}
 
 /* calendar */
 .calhead{display:flex;justify-content:space-between;align-items:center;padding:18px 22px 4px}

@@ -59,11 +59,19 @@
   ST.cat = id => ST.CATS.find(c=>c.id===id) || ST.CATS[ST.CATS.length-1];
   ST.catName = id => ST.t("cat"+id.charAt(0).toUpperCase()+id.slice(1));
 
-  /* tile: colored square w/ category icon */
-  ST.tile = (color, catId, extra) => {
+  /* tile: colored square w/ category icon (or custom icon override) */
+  ST.tile = (color, catId, extra, iconName) => {
     const ink = ST.inkFor(color);
-    return `<span class="tile ${extra||''}" style="background:${color};color:${ink}">${ST.icon(ST.cat(catId).icon)}</span>`;
+    return `<span class="tile ${extra||''}" style="background:${color};color:${ink}">${ST.icon(iconName || ST.cat(catId).icon)}</span>`;
   };
+  ST.tileFor = (sub, extra) => ST.tile(sub.color, sub.category, extra, sub.icon);
+
+  /* pickers */
+  ST.ICONS = ["tv","music","bot","bolt","cloud","gamepad","heart","book","coins","bell","calendar","sparkles","user","grid","ring","dots"];
+  ST.SWATCHES = ["#E50914","#1DB954","#0A84FF","#5856D6","#7A78FF","#FF9F0A","#FF375F","#34C759","#00C4CC","#F24E1E","#BF5AF2","#5A5A60"];
+
+  /* currencies — top 8 shown as chips, full list in selects */
+  ST.CURRENCIES = ["USD","EUR","GBP","GEL","RUB","BRL","TRY","INR","JPY","CAD","AUD","CHF","CNY","KRW","MXN","ARS","COP","CLP","PLN","CZK","HUF","RON","UAH","KZT","AED","SAR","ILS","SEK","NOK","DKK","THB","IDR","PHP","VND","ZAR","NGN","EGP"];
   /* readable ink on brand color */
   ST.inkFor = (hex) => {
     const c = hex.replace("#",""); if (c.length<6) return "#fff";
@@ -75,7 +83,7 @@
 
   /* --- money / dates --- */
   ST.fmtMoney = (v, opts) => {
-    const cur = (ST.state && ST.state.settings.currency) || "USD";
+    const cur = (opts && opts.cur) || (ST.state && ST.state.settings.currency) || "USD";
     try { return new Intl.NumberFormat(ST.lang(), {style:"currency", currency:cur,
       minimumFractionDigits:(opts&&opts.round)?0:2, maximumFractionDigits:(opts&&opts.round)?0:2}).format(v); }
     catch(e){ return cur+" "+v.toFixed(2); }

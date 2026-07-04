@@ -55,6 +55,45 @@
   ];
   ST.PRESETS = R.map(r=>({id:r[0], name:r[1], category:r[2], color:r[3], priceUSD:r[4], cancelUrl:r[5]}));
   ST.preset = id => ST.PRESETS.find(p=>p.id===id);
+
+  /* short step-by-step cancel instructions (service UIs are in English) */
+  ST.GUIDES = {
+    netflix:"Account → Membership → Cancel membership",
+    spotify:"Account → Your plan → Change plan → Cancel Premium",
+    youtube:"Paid memberships → Manage → Deactivate",
+    chatgpt:"Settings → Subscription → Manage → Cancel plan",
+    claude:"Settings → Billing → Cancel subscription",
+    icloud:"iPhone Settings → your name → Subscriptions → iCloud+ → Cancel",
+    appletv:"iPhone Settings → your name → Subscriptions → Apple TV+ → Cancel",
+    applemusic:"iPhone Settings → your name → Subscriptions → Apple Music → Cancel",
+    appleone:"iPhone Settings → your name → Subscriptions → Apple One → Cancel",
+    disney:"Account → Subscription → Cancel subscription",
+    max:"Profile → Subscription → Manage → Cancel",
+    prime:"Account → Prime membership → Manage → End membership",
+    hulu:"Account → Your subscription → Cancel",
+    gamepass:"Microsoft account → Services & subscriptions → Manage → Turn off recurring billing",
+    ms365:"Microsoft account → Services & subscriptions → Manage → Cancel",
+    psplus:"Console: Settings → Users and Accounts → Payment and Subscriptions → Subscriptions",
+    nintendo:"Nintendo eShop → Account → Subscriptions → Turn off auto-renewal",
+    duolingo:"Profile → Settings → Super Duolingo → Cancel subscription",
+    googleone:"one.google.com → Settings → Cancel membership",
+    gemini:"one.google.com → Settings → Cancel membership",
+    dropbox:"Settings → Plan → Cancel plan",
+    notion:"Settings & members → Plans → Downgrade",
+    figma:"Settings → Billing → Change plan",
+    adobe:"Account → Plans → Manage plan → Cancel plan (watch for early-termination fee)",
+    canva:"Settings → Billing & plans → Cancel subscription",
+    linkedin:"Me → Premium features → Manage → Cancel subscription",
+    telegram:"Settings → Telegram Premium → Manage → Cancel",
+    discord:"User Settings → Subscriptions → Cancel",
+    nordvpn:"Nord Account → Billing → Subscriptions → Cancel auto-renewal",
+    audible:"Account details → Membership → Cancel membership",
+    kindle:"Amazon → Memberships & subscriptions → Manage → Cancel",
+    tinder:"Profile → Settings → Manage payment account → Cancel",
+    headspace:"Profile → Settings → Manage subscription → Cancel",
+    calm:"calm.com → Profile → Manage Subscription → Cancel",
+    strava:"Settings → My account → Subscription → Cancel",
+  };
   // shown on onboarding + top of Add screen
   ST.POPULAR = ["netflix","spotify","youtube","chatgpt","icloud","prime","disney","applemusic","gamepass","duolingo","claude","googleone"];
 })();

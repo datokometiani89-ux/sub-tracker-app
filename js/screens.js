@@ -4,9 +4,26 @@
   ST.screens = {};
   const t = (...a)=>ST.t(...a), esc=s=>ST.esc(s), icon=(...a)=>ST.icon(...a);
 
+  /* minimal RFC-4180 CSV parser (quotes, escaped quotes, CRLF) */
+  const parseCSV = (txt) => {
+    const rows = [[]]; let f = "", q = false;
+    for (let i=0; i<txt.length; i++){
+      const c = txt[i];
+      if (q) { if (c==='"') { if (txt[i+1]==='"'){f+='"';i++;} else q=false; } else f+=c; }
+      else if (c==='"') q = true;
+      else if (c===",") { rows[rows.length-1].push(f); f=""; }
+      else if (c==="\n" || c==="\r") {
+        if (c==="\r" && txt[i+1]==="\n") i++;
+        rows[rows.length-1].push(f); f=""; rows.push([]);
+      } else f += c;
+    }
+    rows[rows.length-1].push(f);
+    return rows.filter(r => r.length>1 || (r[0]&&r[0].trim()));
+  };
+
   /* ============ ONBOARDING ============ */
   ST.screens.welcome = () => {
-    const CURR = ["USD","EUR","GBP","GEL","RUB","BRL","TRY","INR"];
+    const CURR = ST.CURRENCIES.slice(0, 8);
     let cur = ST.state.settings.currency;
     const sel = new Set();
 
@@ -26,7 +43,9 @@
         <p>${t("onbSub")}</p>
         <div style="margin-top:26px">
           <div style="font-size:12px;color:var(--mut);letter-spacing:1px;text-transform:uppercase;font-weight:500">${t("onbCurrency")}</div>
-          <div class="curgrid">${CURR.map(c=>`<button data-c="${c}" class="${c===cur?'on':''}">${c}</button>`).join("")}</div>
+          <div class="curgrid">${CURR.map(c=>`<button data-c="${c}" class="${c===cur?'on':''}">${c}</button>`).join("")}
+            <button id="obMore">${t("moreCur")}</button></div>
+          <select id="obCurSel" style="display:none;margin-top:10px">${ST.CURRENCIES.map(c=>`<option ${c===cur?"selected":""}>${c}</option>`).join("")}</select>
         </div>
         <div style="margin-top:26px">
           <div style="font-size:15px;font-weight:600">${t("onbPick")}</div>
@@ -47,6 +66,15 @@
         cur = b.dataset.c;
         root.querySelectorAll("[data-c]").forEach(x=>x.classList.toggle("on", x===b));
       });
+      const moreSel = root.querySelector("#obCurSel");
+      root.querySelector("#obMore").onclick = () => {
+        moreSel.style.display = "block";
+        root.querySelector("#obMore").classList.add("on");
+      };
+      moreSel.onchange = () => {
+        cur = moreSel.value;
+        root.querySelectorAll("[data-c]").forEach(x=>x.classList.remove("on"));
+      };
       root.querySelector("#obgrid").addEventListener("click", e => {
         const b = e.target.closest("[data-p]"); if(!b) return;
         const id = b.dataset.p;
@@ -169,13 +197,13 @@
                   s.status==="paused" ? `<span class="badge paused">${t("pausedBadge")}</span>` : "";
     const cyc = s.cycle.unit==="year"?t("year"):s.cycle.unit==="week"?t("week"):s.cycle.n===3?t("months3"):t("month");
     return `<button class="subcard ${s.status==='paused'?'dim':''}" onclick="location.hash='#/sub/${s.id}'">
-      ${ST.tile(s.color, s.category)}
+      ${ST.tileFor(s)}
       <span style="flex:1">
         <span class="nm">${esc(s.name)} ${badge}</span>
         <span class="dt ${soon?'soon':''}" style="display:block">${soon ? ST.whenLabel(s.nextBilling) : ST.fmtDate(s.nextBilling)}</span>
       </span>
       <span>
-        <span class="pr" style="display:block">${ST.fmtMoney(s.price)}</span>
+        <span class="pr" style="display:block">${ST.fmtMoney(s.price,{cur:s.currency})}</span>
         <span class="cy" style="display:block">${cyc.toLowerCase()}</span>
       </span>
     </button>`;
@@ -237,8 +265,8 @@
       <div class="dhead">${ST.tile(p.color,p.category)}<h2 style="font-size:18px">${esc(p.name)}</h2></div>
       <div class="form">
         <div class="duo">
-          <div><label>${t("price")} (${ST.state.settings.currency})</label>
-            <input id="pp" type="number" step="0.01" inputmode="decimal" value="${p.priceUSD}"></div>
+          <div><label>${t("price")}</label>
+            <div class="curwrap"><span class="pricebox"><input id="pp" type="number" step="0.01" inputmode="decimal" value="${p.priceUSD}"></span>${curSel("pcur", ST.state.settings.currency)}</div></div>
           <div><label>${t("firstBill")}</label>
             <input id="pd" type="date" value="${ST.addCycle(ST.todayISO(),{unit:'month',n:1})}"></div>
         </div>
@@ -252,7 +280,7 @@
       </div>
     `, w => {
       let cyc = {unit:"month",n:1}, isTrial=false;
-      wireCycle(w, c=>cyc=c);
+      wireCycle(w, c=>cyc=c); wireCur(w);
       const tg = w.querySelector("#ptg");
       tg.onclick = () => { isTrial=!isTrial; tg.classList.toggle("on",isTrial);
         w.querySelector("#ptrialbox").style.display = isTrial?"block":"none"; };
@@ -260,7 +288,8 @@
         const price = parseFloat(w.querySelector("#pp").value)||0;
         ST.state.subs.push(ST.newSub({
           presetId:p.id, name:p.name, category:p.category, color:p.color,
-          price, nextBilling: w.querySelector("#pd").value || ST.todayISO(),
+          price, currency: w.querySelector("#pcur").value,
+          nextBilling: w.querySelector("#pd").value || ST.todayISO(),
           cycle:cyc,
           trial: isTrial ? {isTrial:true, endsAt:w.querySelector("#pte").value, priceAfter:price} : {isTrial:false,endsAt:null,priceAfter:null},
           priceHistory:[{date:ST.todayISO(), price}],
@@ -282,6 +311,28 @@
     });
   };
 
+  /* per-sub currency select — multi-currency is a Pro perk */
+  const curSel = (id, val) => {
+    const opts = ST.CURRENCIES.map(c=>`<option ${c===val?"selected":""}>${c}</option>`).join("");
+    return ST.isPro()
+      ? `<select id="${id}">${opts}</select>`
+      : `<span class="curlock" data-golock><select id="${id}" disabled>${opts}</select><span class="lk">${icon("lock")}</span></span>`;
+  };
+  const wireCur = (root) => root.querySelectorAll("[data-golock]").forEach(e =>
+    e.onclick = () => { ST.closeSheets(); location.hash = "#/pro"; });
+
+  /* icon + color pickers */
+  const iconRow = (sel) => `<div class="iconrow">${ST.ICONS.map(i=>
+    `<button type="button" data-ic="${i}" class="${sel===i?'on':''}">${icon(i)}</button>`).join("")}</div>`;
+  const swatchRow = (sel) => `<div class="swatches">${ST.SWATCHES.map(c=>
+    `<button type="button" data-sw="${c}" class="${sel===c?'on':''}" style="background:${c}"></button>`).join("")}</div>`;
+  const wirePick = (root, onIcon, onColor) => {
+    root.querySelectorAll("[data-ic]").forEach(b => b.onclick = () => {
+      root.querySelectorAll("[data-ic]").forEach(x=>x.classList.toggle("on", x===b)); onIcon(b.dataset.ic); });
+    root.querySelectorAll("[data-sw]").forEach(b => b.onclick = () => {
+      root.querySelectorAll("[data-sw]").forEach(x=>x.classList.toggle("on", x===b)); onColor(b.dataset.sw); });
+  };
+
   ST.screens["add/custom"] = () => {
     if (!ST.isPro() && ST.activeSubs().length >= ST.FREE_LIMIT) { location.hash="#/pro"; return; }
     let cyc={unit:"month",n:1}, cat="other", isTrial=false;
@@ -292,14 +343,16 @@
         <div class="form">
           <div><label>${t("name")}</label><input id="cn" placeholder="Gym, rent, hosting…"></div>
           <div class="duo">
-            <div><label>${t("price")} (${ST.state.settings.currency})</label>
-              <input id="cp" type="number" step="0.01" inputmode="decimal" placeholder="9.99"></div>
+            <div><label>${t("price")}</label>
+              <div class="curwrap"><span class="pricebox"><input id="cp" type="number" step="0.01" inputmode="decimal" placeholder="9.99"></span>${curSel("ccur", ST.state.settings.currency)}</div></div>
             <div><label>${t("firstBill")}</label><input id="cd" type="date" value="${ST.todayISO()}"></div>
           </div>
           <div><label>${t("cycle")}</label><div class="cycrow">${cycleBtns(cyc)}</div></div>
           <div><label>${t("category")}</label><div class="catrow" id="cats">
             ${ST.CATS.map(c=>`<button data-c="${c.id}" class="${c.id===cat?'on':''}"><i style="background:${c.dot}"></i>${ST.catName(c.id)}</button>`).join("")}
           </div></div>
+          <div><label>${t("iconLbl")}</label>${iconRow(null)}</div>
+          <div><label>${t("colorLbl")}</label>${swatchRow(null)}</div>
           <div class="togglerow"><span class="t">${t("isTrial")}</span>
             <button class="tgl" id="ctg"><i></i></button></div>
           <div id="ctrialbox" style="display:none"><label>${t("trialEnds")}</label>
@@ -309,7 +362,8 @@
         </div>
       </div>
     `, root => {
-      wireCycle(root, c=>cyc=c);
+      let pIcon=null, pColor=null;
+      wireCycle(root, c=>cyc=c); wireCur(root); wirePick(root, i=>pIcon=i, c=>pColor=c);
       root.querySelector("#cats").addEventListener("click", e=>{
         const b=e.target.closest("[data-c]"); if(!b) return;
         cat=b.dataset.c;
@@ -324,7 +378,8 @@
         if (!name || !price) { ST.toast(t("name")+" + "+t("price")); return; }
         const catDef = ST.cat(cat);
         ST.state.subs.push(ST.newSub({
-          name, price, category:cat, color:catDef.dot,
+          name, price, category:cat, color:pColor||catDef.dot, icon:pIcon,
+          currency: root.querySelector("#ccur").value,
           nextBilling: root.querySelector("#cd").value || ST.todayISO(),
           cycle:cyc, notes: root.querySelector("#cno").value,
           trial: isTrial ? {isTrial:true, endsAt:root.querySelector("#cte").value, priceAfter:price} : {isTrial:false,endsAt:null,priceAfter:null},
@@ -349,21 +404,21 @@
       <div class="screen">
         <button class="back" onclick="history.back()">${icon("chevL")}${t("back")}</button>
         <div class="dhead">
-          ${ST.tile(s.color,s.category)}
+          ${ST.tileFor(s)}
           <h2>${esc(s.name)}</h2>
           <div class="cat">${ST.catName(s.category)} · ${cyc}
             ${s.trial.isTrial?` · <span style="color:var(--amber)">${t("trialBadge")} → ${ST.fmtDate(s.trial.endsAt)}</span>`:""}</div>
         </div>
         <div class="statgrid">
           <div class="stat"><div class="l">${t("price")}</div>
-            <div class="v">${ST.fmtMoney(s.price)}<small> / ${cyc.toLowerCase()}</small></div></div>
+            <div class="v">${ST.fmtMoney(s.price,{cur:s.currency})}<small> / ${cyc.toLowerCase()}</small></div></div>
           <div class="stat"><div class="l">${t("nextBilling")}</div>
             <div class="v">${s.status==="active"?ST.fmtDate(s.nextBilling):"—"}
               ${s.status==="active"?`<small>${ST.whenLabel(s.nextBilling)}</small>`:""}</div></div>
           <div class="stat"><div class="l">${t("totalSpent",{d:ST.fmtDate(s.startedAt,{month:"short",year:"numeric"})})}</div>
-            <div class="v">${ST.fmtMoney(spent)}</div></div>
+            <div class="v">${ST.fmtMoney(spent,{cur:s.currency})}</div></div>
           <div class="stat"><div class="l">${ST.catName(s.category)}</div>
-            <div class="v">${ST.fmtMoney(ST.monthlyOf(s))}<small> ${t("perMo")}</small></div></div>
+            <div class="v">${ST.fmtMoney(ST.monthlyBase(s))}<small> ${t("perMo")}</small></div></div>
         </div>
 
         <div class="dacts">
@@ -380,7 +435,7 @@
         <div class="sect"><div class="t">${t("history")}<em>${s.paymentLog.length}</em></div></div>
         <div class="histlist">${s.paymentLog.slice(-12).reverse().map(p=>
           `<div class="histrow"><span class="d">${ST.fmtDate(p.date,{day:"numeric",month:"short",year:"numeric"})}</span>
-           <span>${ST.fmtMoney(p.amount)}</span></div>`).join("")}</div>` : ""}
+           <span>${ST.fmtMoney(p.amount,{cur:s.currency})}</span></div>`).join("")}</div>` : ""}
       </div>
     `, root => {
       root.querySelector("#dEdit").onclick = () => openEditSheet(s);
@@ -388,12 +443,22 @@
       const p = root.querySelector("#dPause");
       if (p) p.onclick = () => { s.status = s.status==="paused"?"active":"paused"; ST.save(); ST.render(); };
       const h = root.querySelector("#dHow");
-      if (h) h.onclick = () => window.open(preset.cancelUrl, "_blank");
+      if (h) h.onclick = () => {
+        const guide = ST.GUIDES[s.presetId];
+        if (!guide) { window.open(preset.cancelUrl, "_blank"); return; }
+        ST.sheet(`
+          <div class="dhead">${ST.tileFor(s)}<h2 style="font-size:18px">${t("howCancel")}</h2></div>
+          <div class="form">
+            <div style="background:var(--card);border:0.5px solid var(--line2);border-radius:14px;padding:14px 16px;font-size:14px;line-height:1.6;color:var(--txt)">${esc(guide)}</div>
+            <button class="cta" style="position:static;width:100%" id="gOpen">${icon("ext")} ${t("openPage")}</button>
+          </div>
+        `, w => { w.querySelector("#gOpen").onclick = () => window.open(preset.cancelUrl, "_blank"); });
+      };
       const c = root.querySelector("#dCancel");
       if (c) c.onclick = () => {
         s.status = "cancelled"; s.cancelledAt = ST.todayISO(); ST.save();
         ST.confetti();
-        ST.toast(t("savedNow",{v:ST.fmtMoney(ST.monthlyOf(s))}));
+        ST.toast(t("savedNow",{v:ST.fmtMoney(ST.monthlyBase(s))}));
         setTimeout(()=>location.hash="#/", 900);
       };
       root.querySelector("#dDel").onclick = () => {
@@ -409,26 +474,30 @@
 
   const openEditSheet = (s) => {
     ST.sheet(`
-      <div class="dhead">${ST.tile(s.color,s.category)}<h2 style="font-size:18px">${esc(s.name)}</h2></div>
+      <div class="dhead">${ST.tileFor(s)}<h2 style="font-size:18px">${esc(s.name)}</h2></div>
       <div class="form">
         <div><label>${t("name")}</label><input id="en" value="${esc(s.name)}"></div>
         <div class="duo">
-          <div><label>${t("price")}</label><input id="ep" type="number" step="0.01" value="${s.price}"></div>
+          <div><label>${t("price")}</label>
+            <div class="curwrap"><span class="pricebox"><input id="ep" type="number" step="0.01" value="${s.price}"></span>${curSel("ecur", s.currency)}</div></div>
           <div><label>${t("nextBilling")}</label><input id="ed" type="date" value="${s.nextBilling}"></div>
         </div>
         <div><label>${t("cycle")}</label><div class="cycrow">${cycleBtns(s.cycle)}</div></div>
+        <div><label>${t("iconLbl")}</label>${iconRow(s.icon)}</div>
+        <div><label>${t("colorLbl")}</label>${swatchRow(s.color)}</div>
         <button class="cta" style="position:static;width:100%" id="esave">${t("save")}</button>
       </div>
     `, w => {
-      let cyc = {...s.cycle};
-      wireCycle(w, c=>cyc=c);
+      let cyc = {...s.cycle}, pIcon=s.icon, pColor=s.color;
+      wireCycle(w, c=>cyc=c); wireCur(w); wirePick(w, i=>pIcon=i, c=>pColor=c);
       w.querySelector("#esave").onclick = () => {
         const np = parseFloat(w.querySelector("#ep").value)||s.price;
         if (np !== s.price) s.priceHistory.push({date:ST.todayISO(), price:np}); // keep hike history
         s.name = w.querySelector("#en").value.trim() || s.name;
         s.price = np;
+        s.currency = w.querySelector("#ecur").value || s.currency;
         s.nextBilling = w.querySelector("#ed").value || s.nextBilling;
-        s.cycle = cyc;
+        s.cycle = cyc; s.icon = pIcon; s.color = pColor;
         ST.save(); ST.closeSheets(); ST.render();
       };
     });
@@ -459,7 +528,7 @@
 
     const bars = ST.projectionBars();
     const max = Math.max(...bars.map(b=>b.v), 1);
-    const top = subs.slice().sort((a,b)=>ST.monthlyOf(b)-ST.monthlyOf(a)).slice(0,3);
+    const top = subs.slice().sort((a,b)=>ST.monthlyBase(b)-ST.monthlyBase(a)).slice(0,3);
     const saved = ST.savedTotal();
     const hikes = ST.priceHikes();
     const unused = ST.unusedSubs();
@@ -485,8 +554,8 @@
           <div class="l">${t("top3")}</div>
           <div style="margin-top:8px">${top.map((s,i)=>`
             <div class="toprow"><span class="rank">${i+1}</span>
-              ${ST.tile(s.color,s.category)}<span class="nm">${esc(s.name)}</span>
-              <span class="v">${ST.fmtMoney(ST.monthlyOf(s))}${t("perMo")}</span></div>`).join("")}
+              ${ST.tileFor(s)}<span class="nm">${esc(s.name)}</span>
+              <span class="v">${ST.fmtMoney(ST.monthlyBase(s))}${t("perMo")}</span></div>`).join("")}
           </div>
         </div>
 
@@ -500,7 +569,7 @@
         <div class="inscard lockcard">${lock}
           <div class="l">${t("priceHikes")}</div>
           ${hikes.length ? hikes.map(h=>`
-            <div class="hikerow">${ST.tile(h.sub.color,h.sub.category)}
+            <div class="hikerow">${ST.tileFor(h.sub)}
               <span class="nm">${t("hikeText",{name:esc(h.sub.name),p:h.pct})}</span>
               <span class="pc">+${h.pct}%</span></div>`).join("")
           : `<div class="note" style="margin-top:8px">${t("noHikes")}</div>`}
@@ -510,8 +579,8 @@
         <div class="inscard lockcard">${lock}
           <div class="l">${t("unused")}</div>
           ${unused.map(s=>`
-            <div class="hikerow">${ST.tile(s.color,s.category)}
-              <span class="nm">${esc(s.name)} — ${t("unusedText",{d:ST.UNUSED_DAYS,v:ST.fmtMoney(ST.monthlyOf(s))})}</span></div>`).join("")}
+            <div class="hikerow">${ST.tileFor(s)}
+              <span class="nm">${esc(s.name)} — ${t("unusedText",{d:ST.UNUSED_DAYS,v:ST.fmtMoney(ST.monthlyBase(s))})}</span></div>`).join("")}
         </div>` : ""}
 
         <div class="inscard">
@@ -550,7 +619,7 @@
       }
     });
     const entries = Object.values(map).flat();
-    const monthTotal = entries.reduce((a,e)=>a+e.amount,0);
+    const monthTotal = entries.reduce((a,e)=>a+ST.conv(e.amount,e.sub.currency),0);
 
     if (!ST._calSel || !ST._calSel.startsWith(startISO.slice(0,7)))
       ST._calSel = (today>=startISO && today<=endISO) ? today : startISO;
@@ -581,10 +650,10 @@
         <div class="caldaylist">
           ${dayList.length ? dayList.map(e=>`
             <button class="subcard" onclick="location.hash='#/sub/${e.sub.id}'">
-              ${ST.tile(e.sub.color,e.sub.category)}
+              ${ST.tileFor(e.sub)}
               <span style="flex:1"><span class="nm">${esc(e.sub.name)}</span>
                 <span class="dt" style="display:block">${ST.fmtDate(sel)}</span></span>
-              <span class="pr">${ST.fmtMoney(e.amount)}</span>
+              <span class="pr">${ST.fmtMoney(e.amount,{cur:e.sub.currency})}</span>
             </button>`).join("")
           : `<div class="calempty">${t("calNone")}</div>`}
         </div>
@@ -622,7 +691,7 @@
     x.fillStyle="#6E6E73"; x.font="400 46px "+F;
     x.fillText(ST.fmtMoney(ST.yearlyTotal(),{round:1})+" "+ST.t("perYr")+"  ·  "+ST.activeSubs().length+" "+ST.t("active").toLowerCase(), 540, 830);
 
-    const top = ST.activeSubs().slice().sort((a,b)=>ST.monthlyOf(b)-ST.monthlyOf(a)).slice(0,3);
+    const top = ST.activeSubs().slice().sort((a,b)=>ST.monthlyBase(b)-ST.monthlyBase(a)).slice(0,3);
     let yy = 930;
     top.forEach(s => {
       x.fillStyle = s.color;
@@ -631,7 +700,7 @@
       x.textAlign="left"; x.fillStyle="#F5F5F7"; x.font="500 44px "+F;
       x.fillText(s.name, 280, yy);
       x.textAlign="right"; x.fillStyle="#8E8E93"; x.font="400 40px "+F;
-      x.fillText(ST.fmtMoney(ST.monthlyOf(s))+ST.t("perMo"), 900, yy);
+      x.fillText(ST.fmtMoney(ST.monthlyBase(s))+ST.t("perMo"), 900, yy);
       x.textAlign="center"; yy += 110;
     });
 
@@ -658,7 +727,7 @@
   /* ============ SETTINGS ============ */
   ST.screens.settings = () => {
     const st = ST.state.settings;
-    const CURR = ["USD","EUR","GBP","GEL","RUB","BRL","TRY","INR","JPY","CAD","AUD"];
+    const CURR = ST.CURRENCIES;
     ST.mount(`
       <div class="screen">
         <div class="hdr"><h1>${t("settings")}</h1></div>
@@ -690,6 +759,11 @@
         <div class="setgroup">
           <button class="setrow" id="sExport"><span class="ic" style="background:#0F1F14;color:#34C759">${icon("download")}</span>
             <span class="t">${t("exportJson")}</span>${ST.isPro()?"":icon("lock","")}</button>
+          <button class="setrow" id="sCsv"><span class="ic" style="background:#0F1F14;color:#34C759">${icon("download")}</span>
+            <span class="t">${t("exportCsv")}</span>${ST.isPro()?"":icon("lock","")}</button>
+          <button class="setrow" id="sImport"><span class="ic" style="background:#101B2A;color:#5AC8FA">${icon("upRight")}</span>
+            <span class="t">${t("importCsv")}</span></button>
+          <input type="file" id="sImportFile" accept=".csv,text/csv" style="display:none">
           <button class="setrow" id="sErase"><span class="ic" style="background:#2A1210;color:var(--red)">${icon("trash")}</span>
             <span class="t" style="color:var(--red)">${t("erase")}</span></button>
         </div>
@@ -708,6 +782,46 @@
         const blob = new Blob([JSON.stringify(ST.state,null,2)],{type:"application/json"});
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob); a.download = "subtrack-export.json"; a.click();
+      };
+      root.querySelector("#sCsv").onclick = () => {
+        if (!ST.isPro()) { location.hash="#/pro"; return; }
+        const head = "name,price,currency,cycleUnit,cycleN,nextBilling,category,status,startedAt,notes";
+        const q = v => { v=String(v??""); return /[",\n]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v; };
+        const rows = ST.state.subs.map(s=>[s.name,s.price,s.currency,s.cycle.unit,s.cycle.n,
+          s.nextBilling,s.category,s.status,s.startedAt,s.notes].map(q).join(","));
+        const blob = new Blob([head+"\n"+rows.join("\n")],{type:"text/csv"});
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob); a.download = "subtrack-export.csv"; a.click();
+      };
+      const fileIn = root.querySelector("#sImportFile");
+      root.querySelector("#sImport").onclick = () => fileIn.click();
+      fileIn.onchange = () => {
+        const f = fileIn.files[0]; if (!f) return;
+        const rd = new FileReader();
+        rd.onload = () => {
+          const rows = parseCSV(String(rd.result));
+          let n = 0;
+          for (const r of rows) {
+            if (r[0] && r[0].toLowerCase()==="name") continue;               // header
+            const [name,price,currency,unit,cn,nextBilling,category,status,startedAt,notes] = r;
+            if (!name || !parseFloat(price)) continue;
+            if (!ST.isPro() && ST.activeSubs().length >= ST.FREE_LIMIT) break; // free cap
+            ST.state.subs.push(ST.newSub({
+              name, price:parseFloat(price),
+              currency: ST.CURRENCIES.includes(currency) ? currency : ST.state.settings.currency,
+              cycle: {unit: ["week","month","year"].includes(unit)?unit:"month", n: Math.max(1, parseInt(cn)||1)},
+              nextBilling: /^\d{4}-\d{2}-\d{2}$/.test(nextBilling) ? nextBilling : ST.todayISO(),
+              category: ST.CATS.some(c=>c.id===category) ? category : "other",
+              status: ["active","paused","cancelled"].includes(status) ? status : "active",
+              startedAt: /^\d{4}-\d{2}-\d{2}$/.test(startedAt) ? startedAt : ST.todayISO(),
+              notes: notes||"",
+              priceHistory:[{date:ST.todayISO(), price:parseFloat(price)}],
+            }));
+            n++;
+          }
+          ST.save(); ST.toast(t("importedN",{n})); ST.render();
+        };
+        rd.readAsText(f);
       };
       root.querySelector("#sErase").onclick = () => {
         if (!confirm(t("eraseConfirm"))) return;

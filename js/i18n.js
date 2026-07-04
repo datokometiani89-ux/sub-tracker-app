@@ -135,6 +135,14 @@
     shareMy:{en:"My subscriptions",ru:"Мои подписки",es:"Mis suscripciones"},
     shareTag:{en:"tracked with SubTrack",ru:"учёт в SubTrack",es:"con SubTrack"},
     shareDone:{en:"Card ready ✓",ru:"Карточка готова ✓",es:"Tarjeta lista ✓"},
+
+    iconLbl:{en:"Icon",ru:"Иконка",es:"Icono"},
+    colorLbl:{en:"Color",ru:"Цвет",es:"Color"},
+    exportCsv:{en:"Export CSV",ru:"Экспорт CSV",es:"Exportar CSV"},
+    importCsv:{en:"Import CSV",ru:"Импорт CSV",es:"Importar CSV"},
+    importedN:{en:"Imported {n} ✓",ru:"Импортировано {n} ✓",es:"Importado {n} ✓"},
+    openPage:{en:"Open cancellation page",ru:"Открыть страницу отмены",es:"Abrir página de cancelación"},
+    moreCur:{en:"More…",ru:"Ещё…",es:"Más…"},
   };
 
   /* full-language overlays — missing keys fall back to S[key].en */
@@ -160,7 +168,8 @@
     pwDemo:"Versão demo — nenhum pagamento real é processado ainda.", pwDone:"Pro ativado 🎉", restore:"Restaurar compra",
     catEntertainment:"Entretenimento", catMusic:"Música", catAi:"IA", catProductivity:"Produtividade", catCloud:"Nuvem", catGaming:"Jogos", catHealth:"Saúde", catEducation:"Educação", catFinance:"Finanças", catOther:"Outro",
     back:"Voltar", close:"Fechar", cancelledArchive:"Canceladas", notifBody:"{name} renova {when} — {price}",
-    calendar:"Calendário", calSummary:"{n} renovações · {v}", calNone:"Sem renovações neste dia", share:"Compartilhar", shareMy:"Minhas assinaturas", shareTag:"com SubTrack", shareDone:"Cartão pronto ✓" },
+    calendar:"Calendário", calSummary:"{n} renovações · {v}", calNone:"Sem renovações neste dia", share:"Compartilhar", shareMy:"Minhas assinaturas", shareTag:"com SubTrack", shareDone:"Cartão pronto ✓",
+    iconLbl:"Ícone", colorLbl:"Cor", exportCsv:"Exportar CSV", importCsv:"Importar CSV", importedN:"Importado {n} ✓", openPage:"Abrir página de cancelamento", moreCur:"Mais…" },
   de:{ onbTitle:"Wisse, was du<br><em>wirklich</em> zahlst", onbSub:"Behalte alle Abos im Blick, werde vor Abbuchungen gewarnt und kündige Ungenutztes.", onbStart:"Los geht's", onbCurrency:"Deine Währung", onbPick:"Wähle deine Abos", onbPickSub:"Preise und Daten kannst du später ändern", onbAddN:"{n} Abos hinzufügen", onbSkip:"Überspringen",
     home:"Abos", monthly:"Monatlich", yearly:"Jährlich", total:"Gesamt", perMo:"/ Mon.", perYr:"/ Jahr", active:"Aktiv",
     renewsSoon:"{name} verlängert sich bald", willCharge:"{price} wird am {date} abgebucht", review:"Prüfen", inDays:"in {n} Tagen", today:"heute", tomorrow:"morgen",
@@ -182,7 +191,8 @@
     pwDemo:"Demo-Version — es werden noch keine echten Zahlungen verarbeitet.", pwDone:"Pro aktiviert 🎉", restore:"Kauf wiederherstellen",
     catEntertainment:"Unterhaltung", catMusic:"Musik", catAi:"KI", catProductivity:"Produktivität", catCloud:"Cloud", catGaming:"Gaming", catHealth:"Gesundheit", catEducation:"Bildung", catFinance:"Finanzen", catOther:"Sonstiges",
     back:"Zurück", close:"Schließen", cancelledArchive:"Gekündigt", notifBody:"{name} verlängert sich {when} — {price}",
-    calendar:"Kalender", calSummary:"{n} Abbuchungen · {v}", calNone:"Keine Abbuchungen an diesem Tag", share:"Teilen", shareMy:"Meine Abos", shareTag:"mit SubTrack", shareDone:"Karte fertig ✓" },
+    calendar:"Kalender", calSummary:"{n} Abbuchungen · {v}", calNone:"Keine Abbuchungen an diesem Tag", share:"Teilen", shareMy:"Meine Abos", shareTag:"mit SubTrack", shareDone:"Karte fertig ✓",
+    iconLbl:"Symbol", colorLbl:"Farbe", exportCsv:"CSV exportieren", importCsv:"CSV importieren", importedN:"{n} importiert ✓", openPage:"Kündigungsseite öffnen", moreCur:"Mehr…" },
   fr:{ onbTitle:"Sache ce que tu paies <em>vraiment</em>", onbSub:"Suis tes abonnements, sois prévenu avant chaque prélèvement et résilie l'inutile.", onbStart:"Commencer", onbCurrency:"Ta devise", onbPick:"Coche tes abonnements", onbPickSub:"Prix et dates modifiables plus tard", onbAddN:"Ajouter {n} abonnements", onbSkip:"Passer",
     home:"Abonnements", monthly:"Mensuel", yearly:"Annuel", total:"Total", perMo:"/ mois", perYr:"/ an", active:"Actifs",
     renewsSoon:"{name} se renouvelle bientôt", willCharge:"{price} sera prélevé le {date}", review:"Vérifier", inDays:"dans {n} jours", today:"aujourd'hui", tomorrow:"demain",
@@ -204,7 +214,8 @@
     pwDemo:"Version démo — aucun paiement réel n'est traité pour l'instant.", pwDone:"Pro activé 🎉", restore:"Restaurer l'achat",
     catEntertainment:"Divertissement", catMusic:"Musique", catAi:"IA", catProductivity:"Productivité", catCloud:"Cloud", catGaming:"Jeux", catHealth:"Santé", catEducation:"Éducation", catFinance:"Finances", catOther:"Autre",
     back:"Retour", close:"Fermer", cancelledArchive:"Résiliés", notifBody:"{name} se renouvelle {when} — {price}",
-    calendar:"Calendrier", calSummary:"{n} renouvellements · {v}", calNone:"Aucun renouvellement ce jour", share:"Partager", shareMy:"Mes abonnements", shareTag:"avec SubTrack", shareDone:"Carte prête ✓" },
+    calendar:"Calendrier", calSummary:"{n} renouvellements · {v}", calNone:"Aucun renouvellement ce jour", share:"Partager", shareMy:"Mes abonnements", shareTag:"avec SubTrack", shareDone:"Carte prête ✓",
+    iconLbl:"Icône", colorLbl:"Couleur", exportCsv:"Exporter CSV", importCsv:"Importer CSV", importedN:"{n} importés ✓", openPage:"Ouvrir la page de résiliation", moreCur:"Plus…" },
   tr:{ onbTitle:"Gerçekte ne kadar<br>ödediğini <em>bil</em>", onbSub:"Aboneliklerini takip et, yenilemeden önce uyarı al, kullanmadıklarını iptal et.", onbStart:"Başla", onbCurrency:"Para birimin", onbPick:"Aboneliklerini işaretle", onbPickSub:"Fiyat ve tarihleri sonra düzenleyebilirsin", onbAddN:"{n} abonelik ekle", onbSkip:"Atla",
     home:"Abonelikler", monthly:"Aylık", yearly:"Yıllık", total:"Toplam", perMo:"/ ay", perYr:"/ yıl", active:"Aktif",
     renewsSoon:"{name} yakında yenilenecek", willCharge:"{date} tarihinde {price} çekilecek", review:"İncele", inDays:"{n} gün içinde", today:"bugün", tomorrow:"yarın",
@@ -226,7 +237,8 @@
     pwDemo:"Demo sürüm — henüz gerçek ödeme alınmıyor.", pwDone:"Pro etkin 🎉", restore:"Satın almayı geri yükle",
     catEntertainment:"Eğlence", catMusic:"Müzik", catAi:"YZ", catProductivity:"Üretkenlik", catCloud:"Bulut", catGaming:"Oyun", catHealth:"Sağlık", catEducation:"Eğitim", catFinance:"Finans", catOther:"Diğer",
     back:"Geri", close:"Kapat", cancelledArchive:"İptal edilenler", notifBody:"{name} {when} yenileniyor — {price}",
-    calendar:"Takvim", calSummary:"{n} yenileme · {v}", calNone:"Bu gün yenileme yok", share:"Paylaş", shareMy:"Aboneliklerim", shareTag:"SubTrack ile", shareDone:"Kart hazır ✓" },
+    calendar:"Takvim", calSummary:"{n} yenileme · {v}", calNone:"Bu gün yenileme yok", share:"Paylaş", shareMy:"Aboneliklerim", shareTag:"SubTrack ile", shareDone:"Kart hazır ✓",
+    iconLbl:"Simge", colorLbl:"Renk", exportCsv:"CSV dışa aktar", importCsv:"CSV içe aktar", importedN:"{n} içe aktarıldı ✓", openPage:"İptal sayfasını aç", moreCur:"Diğer…" },
   };
 
   ST.STRINGS = S;

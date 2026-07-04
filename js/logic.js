@@ -9,7 +9,26 @@
     if (unit==="year")  return sub.price / (12*n);
     return sub.price / n; // month
   };
-  ST.monthlyTotal = (subs) => (subs||ST.activeSubs()).reduce((a,s)=>a+ST.monthlyOf(s),0);
+  /* FX: convert amount from `from` currency into the base (settings) currency.
+     Rates are USD-based; missing rate → 1:1 fallback (offline-safe). */
+  ST.conv = (v, from) => {
+    const base = ST.state.settings.currency;
+    if (!from || from === base) return v;
+    const r = ST.state.fx && ST.state.fx.rates;
+    if (!r || !r[from] || !r[base]) return v;
+    return v / r[from] * r[base];
+  };
+  ST.monthlyBase = (sub) => ST.conv(ST.monthlyOf(sub), sub.currency);
+  ST.fetchRates = async () => {
+    const fx = ST.state.fx;
+    if (fx.fetchedAt && (Date.now() - new Date(fx.fetchedAt).getTime()) < 864e5) return;
+    try {
+      const j = await (await fetch("https://open.er-api.com/v6/latest/USD")).json();
+      if (j && j.rates) { ST.state.fx = {rates:j.rates, fetchedAt:new Date().toISOString()}; ST.save(); ST.render(); }
+    } catch(e){}
+  };
+
+  ST.monthlyTotal = (subs) => (subs||ST.activeSubs()).reduce((a,s)=>a+ST.monthlyBase(s),0);
   ST.yearlyTotal  = (subs) => ST.monthlyTotal(subs)*12;
 
   /* add one cycle to an ISO date, clamping to month length (billing day 31 → Feb 28) */
@@ -55,7 +74,7 @@
   /* per-category monthly breakdown, sorted desc */
   ST.categoryBreakdown = () => {
     const map = {};
-    ST.activeSubs().forEach(s => { map[s.category] = (map[s.category]||0) + ST.monthlyOf(s); });
+    ST.activeSubs().forEach(s => { map[s.category] = (map[s.category]||0) + ST.monthlyBase(s); });
     return Object.entries(map).map(([id,v])=>({id,v})).sort((a,b)=>b.v-a.v);
   };
 
@@ -67,11 +86,11 @@
     const pym = pd.getFullYear()+"-"+String(pd.getMonth()+1).padStart(2,"0");
     let cur=0, prev=0, seen=false;
     ST.state.subs.forEach(s => s.paymentLog.forEach(p => {
-      if (p.date.startsWith(ym))  cur += p.amount;
-      if (p.date.startsWith(pym)) { prev += p.amount; seen=true; }
+      if (p.date.startsWith(ym))  cur += ST.conv(p.amount, s.currency);
+      if (p.date.startsWith(pym)) { prev += ST.conv(p.amount, s.currency); seen=true; }
     }));
     // project current month forward: payments still due this month
-    ST.activeSubs().forEach(s => { if (s.nextBilling.startsWith(ym)) cur += s.price; });
+    ST.activeSubs().forEach(s => { if (s.nextBilling.startsWith(ym)) cur += ST.conv(s.price, s.currency); });
     if (!seen) return null;
     return { delta: cur - prev, prevLabel: pd.toLocaleDateString(ST.lang(),{month:"long"}) };
   };
@@ -84,9 +103,9 @@
       if (s.status!=="cancelled" || !s.cancelledAt) return;
       count++;
       const months = Math.max(0, (today - new Date(s.cancelledAt+"T00:00:00"))/2629800000);
-      total += ST.monthlyOf(s)*months;
+      total += ST.monthlyBase(s)*months;
     });
-    return {total, count, monthly: ST.state.subs.filter(s=>s.status==="cancelled").reduce((a,s)=>a+ST.monthlyOf(s),0)};
+    return {total, count, monthly: ST.state.subs.filter(s=>s.status==="cancelled").reduce((a,s)=>a+ST.monthlyBase(s),0)};
   };
 
   /* price hikes: current price vs first recorded */
@@ -95,11 +114,13 @@
     .map(s => ({sub:s, pct: Math.round((s.price/s.priceHistory[0].price-1)*100)}))
     .sort((a,b)=>b.pct-a.pct);
 
-  /* possibly unused: lastUsed marked 45+ days ago */
+  /* possibly unused: lastUsed 45+ days ago, OR never marked used on a 45+ day-old sub */
   ST.UNUSED_DAYS = 45;
   ST.unusedSubs = () => ST.activeSubs()
-    .filter(s => s.lastUsed && -ST.daysUntil(s.lastUsed) >= ST.UNUSED_DAYS)
-    .sort((a,b)=>ST.monthlyOf(b)-ST.monthlyOf(a));
+    .filter(s => s.lastUsed
+      ? -ST.daysUntil(s.lastUsed) >= ST.UNUSED_DAYS
+      : -ST.daysUntil(s.startedAt) >= ST.UNUSED_DAYS)
+    .sort((a,b)=>ST.monthlyBase(b)-ST.monthlyBase(a));
 
   /* total spent on a sub from its payment log */
   ST.spentOn = (sub) => sub.paymentLog.reduce((a,p)=>a+p.amount,0);
@@ -114,7 +135,7 @@
       const ym = d.getFullYear()+"-"+String(i+1).padStart(2,"0");
       let real = 0, has=false;
       ST.state.subs.forEach(s => s.paymentLog.forEach(p => {
-        if (p.date.startsWith(ym)) { real+=p.amount; has=true; }
+        if (p.date.startsWith(ym)) { real+=ST.conv(p.amount, s.currency); has=true; }
       }));
       out.push({ label: d.toLocaleDateString(ST.lang(),{month:"narrow"}),
                  v: (i < now.getMonth() && has) ? real : rate,

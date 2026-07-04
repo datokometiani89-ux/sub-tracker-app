@@ -62,6 +62,7 @@
   /* --- boot --- */
   ST.load();
   ST.advanceBilling();
+  ST.fetchRates();   // async; re-renders when fresh FX rates land
   window.addEventListener("hashchange", ST.render);
   document.addEventListener("DOMContentLoaded", () => {
     ST.render();
