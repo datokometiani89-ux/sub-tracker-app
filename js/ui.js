@@ -39,6 +39,7 @@
     download:'<path d="M12 4v12m0 0 4-4m-4 4-4-4M5 20h14"/>',
     selector:'<path d="m8 9 4-4 4 4M8 15l4 4 4-4"/>',
     sparkles:'<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9z"/>',
+    share:'<path d="M12 3v12M8 7l4-4 4 4"/><path d="M6 11v8a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-8"/>',
   };
   ST.icon = (name, cls) =>
     `<svg class="${cls||''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[name]||P.dots}</svg>`;

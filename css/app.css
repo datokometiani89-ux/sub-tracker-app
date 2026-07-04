@@ -264,6 +264,22 @@ input[type=date]{color-scheme:dark}
   border:0.5px solid var(--line2);font-size:14px;color:var(--mut);font-weight:500}
 .curgrid button.on{background:var(--lime);color:var(--lime-ink);border-color:var(--lime);font-weight:700}
 
+/* calendar */
+.calhead{display:flex;justify-content:space-between;align-items:center;padding:18px 22px 4px}
+.calhead .mt{font-size:17px;font-weight:600;letter-spacing:-.3px;text-transform:capitalize}
+.calsum{padding:2px 22px 8px;font-size:13px;color:var(--mut)}
+.calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:6px 16px 0}
+.caldow{text-align:center;font-size:11px;color:var(--dim);padding:4px 0;text-transform:uppercase}
+.calcell{aspect-ratio:1;border-radius:12px;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:3px;font-size:13px;color:var(--txt);position:relative}
+.calcell.today{border:1px solid var(--line2)}
+.calcell.sel{background:var(--lime);color:var(--lime-ink);font-weight:700}
+.calcell.sel .dots i{background:var(--lime-ink)!important}
+.calcell .dots{display:flex;gap:2px;height:4px}
+.calcell .dots i{width:4px;height:4px;border-radius:50%}
+.caldaylist{margin:16px 16px 0;display:flex;flex-direction:column;gap:8px}
+.calempty{padding:26px 22px;text-align:center;font-size:13px;color:var(--dim)}
+
 /* toast */
 .toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);z-index:100;
   background:#1C1C1F;border:0.5px solid #2A2A2E;color:var(--txt);font-size:13px;font-weight:500;

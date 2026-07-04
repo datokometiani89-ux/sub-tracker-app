@@ -4,13 +4,14 @@
   const TABS = [
     ["#/",        "grid",     "home"],
     ["#/insights","chart",    "insights"],
+    ["#/calendar","calendar", "calendar"],
     ["#/settings","settings", "settings"],
   ];
 
   ST.mount = (html, onMount) => {
     const app = document.getElementById("app");
     const route = location.hash || "#/";
-    const showTabs = ST.state.meta.onboarded && ["#/","#/insights","#/settings"].includes(route);
+    const showTabs = ST.state.meta.onboarded && ["#/","#/insights","#/calendar","#/settings"].includes(route);
     app.innerHTML = html + (showTabs ? tabbar(route) : "");
     window.scrollTo(0,0);
     if (onMount) onMount(app);

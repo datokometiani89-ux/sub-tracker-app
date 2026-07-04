@@ -127,16 +127,118 @@
     close:{en:"Close",ru:"Закрыть",es:"Cerrar"},
     cancelledArchive:{en:"Cancelled",ru:"Отменённые",es:"Canceladas"},
     notifBody:{en:"{name} renews {when} — {price}",ru:"{name}: списание {when} — {price}",es:"{name} se renueva {when} — {price}"},
+
+    calendar:{en:"Calendar",ru:"Календарь",es:"Calendario"},
+    calSummary:{en:"{n} renewals · {v}",ru:"{n} списаний · {v}",es:"{n} renovaciones · {v}"},
+    calNone:{en:"No renewals this day",ru:"В этот день списаний нет",es:"Sin renovaciones este día"},
+    share:{en:"Share",ru:"Поделиться",es:"Compartir"},
+    shareMy:{en:"My subscriptions",ru:"Мои подписки",es:"Mis suscripciones"},
+    shareTag:{en:"tracked with SubTrack",ru:"учёт в SubTrack",es:"con SubTrack"},
+    shareDone:{en:"Card ready ✓",ru:"Карточка готова ✓",es:"Tarjeta lista ✓"},
+  };
+
+  /* full-language overlays — missing keys fall back to S[key].en */
+  const X = {
+  pt:{ onbTitle:"Saiba quanto<br>você paga <em>de verdade</em>", onbSub:"Acompanhe suas assinaturas, receba avisos antes da cobrança e cancele o que não usa.", onbStart:"Começar", onbCurrency:"Sua moeda", onbPick:"Marque suas assinaturas", onbPickSub:"Você pode editar preços e datas depois", onbAddN:"Adicionar {n} assinaturas", onbSkip:"Pular",
+    home:"Assinaturas", monthly:"Mensal", yearly:"Anual", total:"Total", perMo:"/ mês", perYr:"/ ano", active:"Ativas",
+    renewsSoon:"{name} renova em breve", willCharge:"{price} será cobrado em {date}", review:"Revisar", inDays:"em {n} dias", today:"hoje", tomorrow:"amanhã",
+    emptyTitle:"Nenhuma assinatura", emptySub:"Adicione a primeira e veja seu gasto mensal real.", addFirst:"Adicionar assinatura",
+    add:"Adicionar assinatura", search:"Buscar serviços…", popular:"Populares", addCustom:"+ Personalizada",
+    name:"Nome", price:"Preço", cycle:"Ciclo de cobrança", firstBill:"Próxima cobrança", category:"Categoria", notes:"Notas (opcional)", save:"Salvar",
+    week:"Semanal", month:"Mensal", months3:"3 meses", year:"Anual", isTrial:"Período grátis", trialEnds:"Fim do teste", added:"Adicionado ✓", limitTitle:"Limite grátis atingido",
+    nextBilling:"Próxima cobrança", totalSpent:"Gasto desde {d}", history:"Histórico de pagamentos",
+    edit:"Editar", pause:"Pausar", resume:"Retomar", cancelSub:"Eu cancelei", delete_:"Excluir", howCancel:"Como cancelar", markUsed:"Usei hoje",
+    savedNow:"Você economiza {v}/mês", confirmDelete:"Excluir esta assinatura?", deleted:"Excluído", undo:"Desfazer", trialBadge:"TESTE", pausedBadge:"PAUSA",
+    insights:"Análises", projection:"Este ano você gastará", top3:"Mais caras", savedSoFar:"Economizado até agora", savedNote:"de {n} assinaturas canceladas",
+    priceHikes:"Aumentos de preço", hikeText:"{name} subiu {p}% desde a assinatura", noHikes:"Nenhum aumento detectado. Ótimo.",
+    unused:"Possivelmente sem uso", unusedText:"Sem atividade há {d}+ dias — são {v}/mês", byCategory:"Por categoria", noData:"Adicione assinaturas para ver análises", unlockPro:"Desbloquear com Pro",
+    settings:"Ajustes", currency:"Moeda", language:"Idioma", notifications:"Lembretes", remind3:"3 dias antes", remind1:"1 dia antes", remindDay:"No dia da cobrança",
+    data:"Dados", exportJson:"Exportar dados (JSON)", erase:"Apagar tudo", eraseConfirm:"Apagar TODOS os dados? Irreversível.",
+    proSub:"Assinaturas ilimitadas + análises completas", proActive:"Pro ativo ✓",
+    pwTitle:"Seja Pro", pwSub:"Um café. Um ano sem pagar a mais.", pwF1:"Assinaturas ilimitadas", pwF2:"Análises e projeções completas", pwF3:"Lembretes personalizados", pwF4:"Exporte seus dados",
+    pwMonthly:"Mensal", pwLifetime:"Vitalício", pwLifetimeD:"Pague uma vez, para sempre", pwBest:"MELHOR PREÇO",
+    pwDemo:"Versão demo — nenhum pagamento real é processado ainda.", pwDone:"Pro ativado 🎉", restore:"Restaurar compra",
+    catEntertainment:"Entretenimento", catMusic:"Música", catAi:"IA", catProductivity:"Produtividade", catCloud:"Nuvem", catGaming:"Jogos", catHealth:"Saúde", catEducation:"Educação", catFinance:"Finanças", catOther:"Outro",
+    back:"Voltar", close:"Fechar", cancelledArchive:"Canceladas", notifBody:"{name} renova {when} — {price}",
+    calendar:"Calendário", calSummary:"{n} renovações · {v}", calNone:"Sem renovações neste dia", share:"Compartilhar", shareMy:"Minhas assinaturas", shareTag:"com SubTrack", shareDone:"Cartão pronto ✓" },
+  de:{ onbTitle:"Wisse, was du<br><em>wirklich</em> zahlst", onbSub:"Behalte alle Abos im Blick, werde vor Abbuchungen gewarnt und kündige Ungenutztes.", onbStart:"Los geht's", onbCurrency:"Deine Währung", onbPick:"Wähle deine Abos", onbPickSub:"Preise und Daten kannst du später ändern", onbAddN:"{n} Abos hinzufügen", onbSkip:"Überspringen",
+    home:"Abos", monthly:"Monatlich", yearly:"Jährlich", total:"Gesamt", perMo:"/ Mon.", perYr:"/ Jahr", active:"Aktiv",
+    renewsSoon:"{name} verlängert sich bald", willCharge:"{price} wird am {date} abgebucht", review:"Prüfen", inDays:"in {n} Tagen", today:"heute", tomorrow:"morgen",
+    emptyTitle:"Noch keine Abos", emptySub:"Füge dein erstes hinzu und sieh deine echten Monatskosten.", addFirst:"Abo hinzufügen",
+    add:"Abo hinzufügen", search:"Dienste suchen…", popular:"Beliebt", addCustom:"+ Eigenes Abo",
+    name:"Name", price:"Preis", cycle:"Abrechnungszeitraum", firstBill:"Nächste Abbuchung", category:"Kategorie", notes:"Notizen (optional)", save:"Speichern",
+    week:"Wöchentlich", month:"Monatlich", months3:"3 Monate", year:"Jährlich", isTrial:"Probeabo", trialEnds:"Probe endet", added:"Hinzugefügt ✓", limitTitle:"Gratis-Limit erreicht",
+    nextBilling:"Nächste Abbuchung", totalSpent:"Ausgegeben seit {d}", history:"Zahlungsverlauf",
+    edit:"Bearbeiten", pause:"Pausieren", resume:"Fortsetzen", cancelSub:"Ich habe gekündigt", delete_:"Löschen", howCancel:"So kündigst du", markUsed:"Heute genutzt",
+    savedNow:"Du sparst {v}/Mon.", confirmDelete:"Dieses Abo löschen?", deleted:"Gelöscht", undo:"Rückgängig", trialBadge:"PROBE", pausedBadge:"PAUSE",
+    insights:"Analysen", projection:"Dieses Jahr gibst du aus", top3:"Am teuersten", savedSoFar:"Bisher gespart", savedNote:"aus {n} gekündigten Abos",
+    priceHikes:"Preiserhöhungen", hikeText:"{name} ist {p}% teurer als am Anfang", noHikes:"Keine Preiserhöhungen. Super.",
+    unused:"Möglicherweise ungenutzt", unusedText:"Keine Aktivität seit {d}+ Tagen — das sind {v}/Mon.", byCategory:"Nach Kategorie", noData:"Füge Abos hinzu, um Analysen zu sehen", unlockPro:"Mit Pro freischalten",
+    settings:"Einstellungen", currency:"Währung", language:"Sprache", notifications:"Erinnerungen", remind3:"3 Tage vorher", remind1:"1 Tag vorher", remindDay:"Am Abbuchungstag",
+    data:"Daten", exportJson:"Daten exportieren (JSON)", erase:"Alles löschen", eraseConfirm:"ALLE Daten löschen? Nicht umkehrbar.",
+    proSub:"Unbegrenzte Abos + alle Analysen", proActive:"Pro aktiv ✓",
+    pwTitle:"Hol dir Pro", pwSub:"Ein Kaffee. Ein Jahr nie zu viel zahlen.", pwF1:"Unbegrenzte Abos", pwF2:"Alle Analysen & Prognosen", pwF3:"Eigene Erinnerungen pro Abo", pwF4:"Datenexport",
+    pwMonthly:"Monatlich", pwLifetime:"Lebenslang", pwLifetimeD:"Einmal zahlen, für immer", pwBest:"BESTER DEAL",
+    pwDemo:"Demo-Version — es werden noch keine echten Zahlungen verarbeitet.", pwDone:"Pro aktiviert 🎉", restore:"Kauf wiederherstellen",
+    catEntertainment:"Unterhaltung", catMusic:"Musik", catAi:"KI", catProductivity:"Produktivität", catCloud:"Cloud", catGaming:"Gaming", catHealth:"Gesundheit", catEducation:"Bildung", catFinance:"Finanzen", catOther:"Sonstiges",
+    back:"Zurück", close:"Schließen", cancelledArchive:"Gekündigt", notifBody:"{name} verlängert sich {when} — {price}",
+    calendar:"Kalender", calSummary:"{n} Abbuchungen · {v}", calNone:"Keine Abbuchungen an diesem Tag", share:"Teilen", shareMy:"Meine Abos", shareTag:"mit SubTrack", shareDone:"Karte fertig ✓" },
+  fr:{ onbTitle:"Sache ce que tu paies <em>vraiment</em>", onbSub:"Suis tes abonnements, sois prévenu avant chaque prélèvement et résilie l'inutile.", onbStart:"Commencer", onbCurrency:"Ta devise", onbPick:"Coche tes abonnements", onbPickSub:"Prix et dates modifiables plus tard", onbAddN:"Ajouter {n} abonnements", onbSkip:"Passer",
+    home:"Abonnements", monthly:"Mensuel", yearly:"Annuel", total:"Total", perMo:"/ mois", perYr:"/ an", active:"Actifs",
+    renewsSoon:"{name} se renouvelle bientôt", willCharge:"{price} sera prélevé le {date}", review:"Vérifier", inDays:"dans {n} jours", today:"aujourd'hui", tomorrow:"demain",
+    emptyTitle:"Aucun abonnement", emptySub:"Ajoute le premier et découvre tes vraies dépenses mensuelles.", addFirst:"Ajouter un abonnement",
+    add:"Ajouter un abonnement", search:"Rechercher…", popular:"Populaires", addCustom:"+ Personnalisé",
+    name:"Nom", price:"Prix", cycle:"Cycle de facturation", firstBill:"Prochain prélèvement", category:"Catégorie", notes:"Notes (facultatif)", save:"Enregistrer",
+    week:"Hebdo", month:"Mensuel", months3:"3 mois", year:"Annuel", isTrial:"Essai gratuit", trialEnds:"Fin de l'essai", added:"Ajouté ✓", limitTitle:"Limite gratuite atteinte",
+    nextBilling:"Prochain prélèvement", totalSpent:"Dépensé depuis {d}", history:"Historique des paiements",
+    edit:"Modifier", pause:"Suspendre", resume:"Reprendre", cancelSub:"J'ai résilié", delete_:"Supprimer", howCancel:"Comment résilier", markUsed:"Utilisé aujourd'hui",
+    savedNow:"Tu économises {v}/mois", confirmDelete:"Supprimer cet abonnement ?", deleted:"Supprimé", undo:"Annuler", trialBadge:"ESSAI", pausedBadge:"PAUSE",
+    insights:"Analyses", projection:"Cette année tu dépenseras", top3:"Les plus chers", savedSoFar:"Économisé à ce jour", savedNote:"sur {n} abonnements résiliés",
+    priceHikes:"Hausses de prix", hikeText:"{name} a augmenté de {p}% depuis ton abonnement", noHikes:"Aucune hausse détectée. Parfait.",
+    unused:"Peut-être inutilisé", unusedText:"Aucune activité depuis {d}+ jours — soit {v}/mois", byCategory:"Par catégorie", noData:"Ajoute des abonnements pour voir les analyses", unlockPro:"Débloquer avec Pro",
+    settings:"Réglages", currency:"Devise", language:"Langue", notifications:"Rappels", remind3:"3 jours avant", remind1:"1 jour avant", remindDay:"Le jour du prélèvement",
+    data:"Données", exportJson:"Exporter (JSON)", erase:"Tout effacer", eraseConfirm:"Effacer TOUTES les données ? Irréversible.",
+    proSub:"Abonnements illimités + analyses complètes", proActive:"Pro actif ✓",
+    pwTitle:"Passe Pro", pwSub:"Un café. Un an sans trop payer.", pwF1:"Abonnements illimités", pwF2:"Analyses et projections complètes", pwF3:"Rappels personnalisés", pwF4:"Export de données",
+    pwMonthly:"Mensuel", pwLifetime:"À vie", pwLifetimeD:"Paie une fois, garde pour toujours", pwBest:"MEILLEUR PRIX",
+    pwDemo:"Version démo — aucun paiement réel n'est traité pour l'instant.", pwDone:"Pro activé 🎉", restore:"Restaurer l'achat",
+    catEntertainment:"Divertissement", catMusic:"Musique", catAi:"IA", catProductivity:"Productivité", catCloud:"Cloud", catGaming:"Jeux", catHealth:"Santé", catEducation:"Éducation", catFinance:"Finances", catOther:"Autre",
+    back:"Retour", close:"Fermer", cancelledArchive:"Résiliés", notifBody:"{name} se renouvelle {when} — {price}",
+    calendar:"Calendrier", calSummary:"{n} renouvellements · {v}", calNone:"Aucun renouvellement ce jour", share:"Partager", shareMy:"Mes abonnements", shareTag:"avec SubTrack", shareDone:"Carte prête ✓" },
+  tr:{ onbTitle:"Gerçekte ne kadar<br>ödediğini <em>bil</em>", onbSub:"Aboneliklerini takip et, yenilemeden önce uyarı al, kullanmadıklarını iptal et.", onbStart:"Başla", onbCurrency:"Para birimin", onbPick:"Aboneliklerini işaretle", onbPickSub:"Fiyat ve tarihleri sonra düzenleyebilirsin", onbAddN:"{n} abonelik ekle", onbSkip:"Atla",
+    home:"Abonelikler", monthly:"Aylık", yearly:"Yıllık", total:"Toplam", perMo:"/ ay", perYr:"/ yıl", active:"Aktif",
+    renewsSoon:"{name} yakında yenilenecek", willCharge:"{date} tarihinde {price} çekilecek", review:"İncele", inDays:"{n} gün içinde", today:"bugün", tomorrow:"yarın",
+    emptyTitle:"Henüz abonelik yok", emptySub:"İlkini ekle ve aylık gerçek harcamanı gör.", addFirst:"Abonelik ekle",
+    add:"Abonelik ekle", search:"Servis ara…", popular:"Popüler", addCustom:"+ Özel abonelik",
+    name:"Ad", price:"Fiyat", cycle:"Ödeme dönemi", firstBill:"Sonraki ödeme", category:"Kategori", notes:"Notlar (isteğe bağlı)", save:"Kaydet",
+    week:"Haftalık", month:"Aylık", months3:"3 ay", year:"Yıllık", isTrial:"Ücretsiz deneme", trialEnds:"Deneme bitişi", added:"Eklendi ✓", limitTitle:"Ücretsiz sınıra ulaşıldı",
+    nextBilling:"Sonraki ödeme", totalSpent:"{d} tarihinden beri harcanan", history:"Ödeme geçmişi",
+    edit:"Düzenle", pause:"Duraklat", resume:"Devam et", cancelSub:"İptal ettim", delete_:"Sil", howCancel:"Nasıl iptal edilir", markUsed:"Bugün kullandım",
+    savedNow:"Ayda {v} tasarruf ediyorsun", confirmDelete:"Bu abonelik silinsin mi?", deleted:"Silindi", undo:"Geri al", trialBadge:"DENEME", pausedBadge:"DURDU",
+    insights:"Analizler", projection:"Bu yıl harcayacağın", top3:"En pahalılar", savedSoFar:"Şimdiye kadar tasarruf", savedNote:"{n} iptal edilen abonelikten",
+    priceHikes:"Zamlar", hikeText:"{name} abone olduğundan beri %{p} zamlandı", noHikes:"Zam tespit edilmedi. Harika.",
+    unused:"Muhtemelen kullanılmıyor", unusedText:"{d}+ gündür aktivite yok — ayda {v}", byCategory:"Kategoriye göre", noData:"Analizleri görmek için abonelik ekle", unlockPro:"Pro ile aç",
+    settings:"Ayarlar", currency:"Para birimi", language:"Dil", notifications:"Hatırlatıcılar", remind3:"3 gün önce", remind1:"1 gün önce", remindDay:"Ödeme günü",
+    data:"Veriler", exportJson:"Verileri dışa aktar (JSON)", erase:"Her şeyi sil", eraseConfirm:"TÜM veriler silinsin mi? Geri alınamaz.",
+    proSub:"Sınırsız abonelik + tüm analizler", proActive:"Pro aktif ✓",
+    pwTitle:"Pro'ya geç", pwSub:"Bir kahve. Bir yıl fazla ödeme yok.", pwF1:"Sınırsız abonelik", pwF2:"Tüm analizler ve projeksiyonlar", pwF3:"Aboneliğe özel hatırlatıcılar", pwF4:"Verilerini dışa aktar",
+    pwMonthly:"Aylık", pwLifetime:"Ömür boyu", pwLifetimeD:"Bir kez öde, hep senin", pwBest:"EN İYİ FİYAT",
+    pwDemo:"Demo sürüm — henüz gerçek ödeme alınmıyor.", pwDone:"Pro etkin 🎉", restore:"Satın almayı geri yükle",
+    catEntertainment:"Eğlence", catMusic:"Müzik", catAi:"YZ", catProductivity:"Üretkenlik", catCloud:"Bulut", catGaming:"Oyun", catHealth:"Sağlık", catEducation:"Eğitim", catFinance:"Finans", catOther:"Diğer",
+    back:"Geri", close:"Kapat", cancelledArchive:"İptal edilenler", notifBody:"{name} {when} yenileniyor — {price}",
+    calendar:"Takvim", calSummary:"{n} yenileme · {v}", calNone:"Bu gün yenileme yok", share:"Paylaş", shareMy:"Aboneliklerim", shareTag:"SubTrack ile", shareDone:"Kart hazır ✓" },
   };
 
   ST.STRINGS = S;
   ST.lang = () => (ST.state && ST.state.settings.locale) || "en";
   ST.setLang = (l) => { ST.state.settings.locale = l; ST.save(); };
   ST.t = (key, params) => {
-    const e = S[key];
-    let s = e ? (e[ST.lang()] || e.en) : key;
+    const lang = ST.lang();
+    const ov = X[lang];
+    let s = (ov && ov[key] !== undefined) ? ov[key]
+          : (S[key] ? (S[key][lang] || S[key].en) : key);
     if (params) for (const k in params) s = s.replaceAll("{"+k+"}", params[k]);
     return s;
   };
-  ST.LANGS = [["en","English"],["ru","Русский"],["es","Español"]];
+  ST.LANGS = [["en","English"],["ru","Русский"],["es","Español"],["pt","Português"],["de","Deutsch"],["fr","Français"],["tr","Türkçe"]];
 })();

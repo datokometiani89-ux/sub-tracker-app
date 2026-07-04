@@ -470,7 +470,9 @@
 
     ST.mount(`
       <div class="screen">
-        <div class="hdr"><h1>${t("insights")}</h1></div>
+        <div class="hdr"><h1>${t("insights")}</h1>
+          <div class="acts"><button class="icobtn lime" onclick="ST.shareCard()" aria-label="${t("share")}">${icon("share")}</button></div>
+        </div>
 
         <div class="inscard">
           <div class="l">${t("projection")}</div>
@@ -523,6 +525,134 @@
         </div>
       </div>
     `);
+  };
+
+  /* ============ CALENDAR ============ */
+  ST.screens.calendar = () => {
+    if (!ST._calYM) { const d=new Date(); ST._calYM=[d.getFullYear(), d.getMonth()]; }
+    const [y,m] = ST._calYM;
+    const first = new Date(y,m,1), last = new Date(y,m+1,0);
+    const iso = d => d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+    const startISO = iso(first), endISO = iso(last), today = ST.todayISO();
+
+    // date -> [{sub, amount}]: past = paymentLog, future = projected from nextBilling
+    const map = {};
+    const push = (d,e) => (map[d] = map[d]||[]).push(e);
+    ST.state.subs.forEach(s => s.paymentLog.forEach(p => {
+      if (p.date>=startISO && p.date<=endISO) push(p.date, {sub:s, amount:p.amount});
+    }));
+    ST.activeSubs().forEach(s => {
+      const anchor = Number((s.startedAt||s.nextBilling).split("-")[2]);
+      let d = s.nextBilling, guard=0;
+      while (d <= endISO && guard++ < 40) {
+        if (d >= startISO) push(d, {sub:s, amount:s.price});
+        d = ST.addCycle(d, s.cycle, anchor);
+      }
+    });
+    const entries = Object.values(map).flat();
+    const monthTotal = entries.reduce((a,e)=>a+e.amount,0);
+
+    if (!ST._calSel || !ST._calSel.startsWith(startISO.slice(0,7)))
+      ST._calSel = (today>=startISO && today<=endISO) ? today : startISO;
+    const sel = ST._calSel;
+
+    const dow = [];
+    for (let i=0;i<7;i++) dow.push(new Date(2026,5,1+i).toLocaleDateString(ST.lang(),{weekday:"narrow"}));
+    const blanks = (first.getDay()+6)%7;
+    let cells = "";
+    for (let i=0;i<blanks;i++) cells += `<div></div>`;
+    for (let d=1; d<=last.getDate(); d++){
+      const dISO = startISO.slice(0,8)+String(d).padStart(2,"0");
+      const dots = (map[dISO]||[]).slice(0,3).map(e=>`<i style="background:${e.sub.color}"></i>`).join("");
+      cells += `<button class="calcell ${dISO===today?'today':''} ${dISO===sel?'sel':''}" data-d="${dISO}">
+        ${d}<span class="dots">${dots}</span></button>`;
+    }
+    const dayList = (map[sel]||[]);
+
+    ST.mount(`
+      <div class="screen">
+        <div class="calhead">
+          <button class="icobtn" id="calPrev">${icon("chevL")}</button>
+          <div class="mt">${first.toLocaleDateString(ST.lang(),{month:"long",year:"numeric"})}</div>
+          <button class="icobtn" id="calNext">${icon("chevR")}</button>
+        </div>
+        <div class="calsum">${t("calSummary",{n:entries.length, v:ST.fmtMoney(monthTotal)})}</div>
+        <div class="calgrid">${dow.map(w=>`<div class="caldow">${w}</div>`).join("")}${cells}</div>
+        <div class="caldaylist">
+          ${dayList.length ? dayList.map(e=>`
+            <button class="subcard" onclick="location.hash='#/sub/${e.sub.id}'">
+              ${ST.tile(e.sub.color,e.sub.category)}
+              <span style="flex:1"><span class="nm">${esc(e.sub.name)}</span>
+                <span class="dt" style="display:block">${ST.fmtDate(sel)}</span></span>
+              <span class="pr">${ST.fmtMoney(e.amount)}</span>
+            </button>`).join("")
+          : `<div class="calempty">${t("calNone")}</div>`}
+        </div>
+      </div>
+    `, root => {
+      root.querySelector("#calPrev").onclick = () => {
+        let [yy,mm]=ST._calYM; mm--; if(mm<0){mm=11;yy--;} ST._calYM=[yy,mm]; ST._calSel=null; ST.render(); };
+      root.querySelector("#calNext").onclick = () => {
+        let [yy,mm]=ST._calYM; mm++; if(mm>11){mm=0;yy++;} ST._calYM=[yy,mm]; ST._calSel=null; ST.render(); };
+      root.querySelector(".calgrid").addEventListener("click", e => {
+        const b = e.target.closest("[data-d]"); if(!b) return;
+        ST._calSel = b.dataset.d; ST.render();
+      });
+    });
+  };
+
+  /* ============ SHARE CARD ============ */
+  ST.buildShareCanvas = () => {
+    const c = document.createElement("canvas");
+    c.width = 1080; c.height = 1350;
+    const x = c.getContext("2d");
+    const F = "-apple-system,'SF Pro Display',system-ui,sans-serif";
+    x.fillStyle = "#09090B"; x.fillRect(0,0,1080,1350);
+
+    x.strokeStyle="#2C2C30"; x.lineWidth=54; x.lineCap="round";
+    x.beginPath(); x.arc(540,300,165,0,Math.PI*2); x.stroke();
+    x.strokeStyle="#D7FF3F";
+    x.beginPath(); x.arc(540,300,165,-Math.PI/2,-Math.PI/2+Math.PI*1.4); x.stroke();
+
+    x.textAlign="center";
+    x.fillStyle="#8E8E93"; x.font="500 40px "+F;
+    x.fillText(ST.t("shareMy").toUpperCase(), 540, 610);
+    x.fillStyle="#F5F5F7"; x.font="300 150px "+F;
+    x.fillText(ST.fmtMoney(ST.monthlyTotal()), 540, 760);
+    x.fillStyle="#6E6E73"; x.font="400 46px "+F;
+    x.fillText(ST.fmtMoney(ST.yearlyTotal(),{round:1})+" "+ST.t("perYr")+"  ·  "+ST.activeSubs().length+" "+ST.t("active").toLowerCase(), 540, 830);
+
+    const top = ST.activeSubs().slice().sort((a,b)=>ST.monthlyOf(b)-ST.monthlyOf(a)).slice(0,3);
+    let yy = 930;
+    top.forEach(s => {
+      x.fillStyle = s.color;
+      if (x.roundRect){ x.beginPath(); x.roundRect(180, yy-46, 64, 64, 18); x.fill(); }
+      else x.fillRect(180, yy-46, 64, 64);
+      x.textAlign="left"; x.fillStyle="#F5F5F7"; x.font="500 44px "+F;
+      x.fillText(s.name, 280, yy);
+      x.textAlign="right"; x.fillStyle="#8E8E93"; x.font="400 40px "+F;
+      x.fillText(ST.fmtMoney(ST.monthlyOf(s))+ST.t("perMo"), 900, yy);
+      x.textAlign="center"; yy += 110;
+    });
+
+    x.fillStyle="#D7FF3F"; x.beginPath(); x.arc(430,1270,14,0,Math.PI*2); x.fill();
+    x.textAlign="left"; x.fillStyle="#F5F5F7"; x.font="600 40px "+F;
+    x.fillText("SubTrack", 460, 1284);
+    x.textAlign="center"; x.fillStyle="#6E6E73"; x.font="400 30px "+F;
+    x.fillText(ST.t("shareTag"), 540, 1330);
+    return c;
+  };
+  ST.shareCard = () => {
+    ST.buildShareCanvas().toBlob(async blob => {
+      if (!blob) return;
+      const file = new File([blob], "subtrack-card.png", {type:"image/png"});
+      if (navigator.canShare && navigator.canShare({files:[file]})) {
+        try { await navigator.share({files:[file], title:"SubTrack"}); return; } catch(e){}
+      }
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob); a.download = "subtrack-card.png"; a.click();
+      ST.toast(ST.t("shareDone"));
+    }, "image/png");
   };
 
   /* ============ SETTINGS ============ */

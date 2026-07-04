@@ -7,7 +7,7 @@
     version: 1,
     settings: {
       currency: "USD",
-      locale: (navigator.language||"en").slice(0,2).match(/^(ru|es)$/) ? (navigator.language||"en").slice(0,2) : "en",
+      locale: (navigator.language||"en").slice(0,2).match(/^(ru|es|pt|de|fr|tr)$/) ? (navigator.language||"en").slice(0,2) : "en",
       theme: "dark",
       reminders: { d7:false, d3:true, d1:true, dayOf:true },
     },
