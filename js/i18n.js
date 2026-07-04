@@ -1,0 +1,142 @@
+/* SubTrack i18n — EN base + RU + ES */
+(function(){
+  const ST = window.ST = window.ST || {};
+
+  const S = {
+    appName:{en:"SubTrack",ru:"SubTrack",es:"SubTrack"},
+
+    onbTitle:{en:"Know what<br>you <em>really</em> pay",ru:"Знай, сколько<br>ты <em>реально</em> платишь",es:"Sabe cuánto<br>pagas <em>de verdad</em>"},
+    onbSub:{en:"Track every subscription, get warned before renewals, cancel what you don't use.",ru:"Отслеживай подписки, получай напоминания до списания и отменяй лишнее.",es:"Controla tus suscripciones, recibe avisos antes del cobro y cancela lo que no usas."},
+    onbStart:{en:"Get started",ru:"Начать",es:"Empezar"},
+    onbCurrency:{en:"Your currency",ru:"Твоя валюта",es:"Tu moneda"},
+    onbPick:{en:"Tap what you're subscribed to",ru:"Отметь свои подписки",es:"Marca tus suscripciones"},
+    onbPickSub:{en:"You can edit prices and dates later",ru:"Цены и даты можно изменить позже",es:"Podrás editar precios y fechas después"},
+    onbAddN:{en:"Add {n} subscriptions",ru:"Добавить: {n}",es:"Añadir {n} suscripciones"},
+    onbSkip:{en:"Skip for now",ru:"Пропустить",es:"Omitir"},
+
+    home:{en:"Subscriptions",ru:"Подписки",es:"Suscripciones"},
+    monthly:{en:"Monthly",ru:"В месяц",es:"Mensual"},
+    yearly:{en:"Yearly",ru:"В год",es:"Anual"},
+    total:{en:"Total",ru:"Итого",es:"Total"},
+    perMo:{en:"/ mo",ru:"/ мес",es:"/ mes"},
+    perYr:{en:"/ yr",ru:"/ год",es:"/ año"},
+    vsPrev:{en:"{v} vs {m}",ru:"{v} к {m}",es:"{v} vs {m}"},
+    active:{en:"Active",ru:"Активные",es:"Activas"},
+    renewsSoon:{en:"{name} renews soon",ru:"{name}: скоро списание",es:"{name} se renueva pronto"},
+    willCharge:{en:"{price} will be charged {date}",ru:"{price} спишется {date}",es:"Se cobrará {price} el {date}"},
+    review:{en:"Review",ru:"Проверить",es:"Revisar"},
+    inDays:{en:"in {n} days",ru:"через {n} дн.",es:"en {n} días"},
+    today:{en:"today",ru:"сегодня",es:"hoy"},
+    tomorrow:{en:"tomorrow",ru:"завтра",es:"mañana"},
+    emptyTitle:{en:"No subscriptions yet",ru:"Пока нет подписок",es:"Sin suscripciones"},
+    emptySub:{en:"Add your first one and see what you really spend per month.",ru:"Добавь первую и узнай реальные траты в месяц.",es:"Añade la primera y descubre tu gasto real mensual."},
+    addFirst:{en:"Add subscription",ru:"Добавить подписку",es:"Añadir suscripción"},
+
+    add:{en:"Add subscription",ru:"Новая подписка",es:"Añadir suscripción"},
+    search:{en:"Search services…",ru:"Поиск сервисов…",es:"Buscar servicios…"},
+    popular:{en:"Popular",ru:"Популярные",es:"Populares"},
+    addCustom:{en:"+ Add custom",ru:"+ Своя подписка",es:"+ Personalizada"},
+    name:{en:"Name",ru:"Название",es:"Nombre"},
+    price:{en:"Price",ru:"Цена",es:"Precio"},
+    cycle:{en:"Billing cycle",ru:"Период оплаты",es:"Ciclo de pago"},
+    firstBill:{en:"Next billing date",ru:"Дата списания",es:"Próximo cobro"},
+    category:{en:"Category",ru:"Категория",es:"Categoría"},
+    notes:{en:"Notes (optional)",ru:"Заметки (необязательно)",es:"Notas (opcional)"},
+    save:{en:"Save",ru:"Сохранить",es:"Guardar"},
+    week:{en:"Weekly",ru:"Неделя",es:"Semanal"},
+    month:{en:"Monthly",ru:"Месяц",es:"Mensual"},
+    months3:{en:"3 months",ru:"3 месяца",es:"3 meses"},
+    year:{en:"Yearly",ru:"Год",es:"Anual"},
+    isTrial:{en:"Free trial",ru:"Пробный период",es:"Prueba gratis"},
+    trialEnds:{en:"Trial ends",ru:"Проба до",es:"Fin de prueba"},
+    added:{en:"Added ✓",ru:"Добавлено ✓",es:"Añadido ✓"},
+    limitTitle:{en:"Free limit reached",ru:"Лимит бесплатной версии",es:"Límite gratis alcanzado"},
+
+    nextBilling:{en:"Next billing",ru:"Списание",es:"Próximo cobro"},
+    totalSpent:{en:"Spent since {d}",ru:"Потрачено с {d}",es:"Gastado desde {d}"},
+    history:{en:"Payment history",ru:"История платежей",es:"Historial de pagos"},
+    edit:{en:"Edit",ru:"Изменить",es:"Editar"},
+    pause:{en:"Pause",ru:"Пауза",es:"Pausar"},
+    resume:{en:"Resume",ru:"Возобновить",es:"Reanudar"},
+    cancelSub:{en:"I cancelled it",ru:"Я отменил(а)",es:"La cancelé"},
+    delete_:{en:"Delete",ru:"Удалить",es:"Eliminar"},
+    howCancel:{en:"How to cancel",ru:"Как отменить",es:"Cómo cancelar"},
+    markUsed:{en:"I used it today",ru:"Пользуюсь",es:"La usé hoy"},
+    savedNow:{en:"You're saving {v}/mo",ru:"Экономия {v}/мес",es:"Ahorras {v}/mes"},
+    confirmDelete:{en:"Delete this subscription?",ru:"Удалить подписку?",es:"¿Eliminar suscripción?"},
+    deleted:{en:"Deleted",ru:"Удалено",es:"Eliminado"},
+    undo:{en:"Undo",ru:"Вернуть",es:"Deshacer"},
+    trialBadge:{en:"TRIAL",ru:"ПРОБА",es:"PRUEBA"},
+    pausedBadge:{en:"PAUSED",ru:"ПАУЗА",es:"PAUSA"},
+
+    insights:{en:"Insights",ru:"Аналитика",es:"Análisis"},
+    projection:{en:"This year you'll spend",ru:"За год ты потратишь",es:"Este año gastarás"},
+    top3:{en:"Most expensive",ru:"Самые дорогие",es:"Más caras"},
+    savedSoFar:{en:"Saved so far",ru:"Уже сэкономлено",es:"Ahorrado hasta ahora"},
+    savedNote:{en:"from {n} cancelled subscriptions",ru:"с {n} отменённых подписок",es:"de {n} suscripciones canceladas"},
+    priceHikes:{en:"Price increases",ru:"Подорожания",es:"Subidas de precio"},
+    hikeText:{en:"{name} is up {p}% since you subscribed",ru:"{name}: +{p}% с момента подписки",es:"{name} subió {p}% desde que te suscribiste"},
+    noHikes:{en:"No price increases detected. Nice.",ru:"Подорожаний нет. Отлично.",es:"Sin subidas de precio. Genial."},
+    unused:{en:"Possibly unused",ru:"Возможно, не используется",es:"Posiblemente sin uso"},
+    unusedText:{en:"No activity marked for {d}+ days — that's {v}/mo",ru:"Нет активности {d}+ дней — это {v}/мес",es:"Sin actividad {d}+ días — son {v}/mes"},
+    byCategory:{en:"By category",ru:"По категориям",es:"Por categoría"},
+    noData:{en:"Add subscriptions to see insights",ru:"Добавь подписки, чтобы видеть аналитику",es:"Añade suscripciones para ver análisis"},
+    unlockPro:{en:"Unlock with Pro",ru:"Открыть в Pro",es:"Desbloquear con Pro"},
+
+    settings:{en:"Settings",ru:"Настройки",es:"Ajustes"},
+    currency:{en:"Currency",ru:"Валюта",es:"Moneda"},
+    language:{en:"Language",ru:"Язык",es:"Idioma"},
+    notifications:{en:"Reminders",ru:"Напоминания",es:"Recordatorios"},
+    remind3:{en:"3 days before",ru:"За 3 дня",es:"3 días antes"},
+    remind1:{en:"1 day before",ru:"За 1 день",es:"1 día antes"},
+    remindDay:{en:"On billing day",ru:"В день списания",es:"El día del cobro"},
+    data:{en:"Data",ru:"Данные",es:"Datos"},
+    exportJson:{en:"Export data (JSON)",ru:"Экспорт данных (JSON)",es:"Exportar datos (JSON)"},
+    erase:{en:"Erase everything",ru:"Стереть всё",es:"Borrar todo"},
+    eraseConfirm:{en:"Delete ALL data? This cannot be undone.",ru:"Удалить ВСЕ данные? Это необратимо.",es:"¿Borrar TODOS los datos? Irreversible."},
+    proTitle:{en:"SubTrack Pro",ru:"SubTrack Pro",es:"SubTrack Pro"},
+    proSub:{en:"Unlimited subscriptions + full insights",ru:"Безлимит подписок + вся аналитика",es:"Suscripciones ilimitadas + análisis completo"},
+    proActive:{en:"Pro active ✓",ru:"Pro активен ✓",es:"Pro activo ✓"},
+
+    pwTitle:{en:"Go Pro",ru:"Перейти на Pro",es:"Hazte Pro"},
+    pwSub:{en:"One coffee. A year of never overpaying.",ru:"Одна чашка кофе — год без лишних трат.",es:"Un café. Un año sin pagar de más."},
+    pwF1:{en:"Unlimited subscriptions",ru:"Безлимит подписок",es:"Suscripciones ilimitadas"},
+    pwF2:{en:"Full insights & projections",ru:"Полная аналитика и прогнозы",es:"Análisis y proyecciones completas"},
+    pwF3:{en:"Custom reminders per subscription",ru:"Свои напоминания для каждой подписки",es:"Recordatorios personalizados"},
+    pwF4:{en:"Export your data",ru:"Экспорт данных",es:"Exporta tus datos"},
+    pwMonthly:{en:"Monthly",ru:"Помесячно",es:"Mensual"},
+    pwLifetime:{en:"Lifetime",ru:"Навсегда",es:"De por vida"},
+    pwLifetimeD:{en:"Pay once, keep forever",ru:"Один платёж — навсегда",es:"Paga una vez, para siempre"},
+    pwBest:{en:"BEST VALUE",ru:"ВЫГОДНО",es:"MEJOR PRECIO"},
+    pwDemo:{en:"Demo build — no real payment is processed yet. In-app purchases arrive with the store release.",ru:"Демо-версия — реальные платежи пока не проводятся. Покупки появятся в релизе.",es:"Versión demo — aún no se procesan pagos reales. Las compras llegarán con el lanzamiento."},
+    pwDone:{en:"Pro activated 🎉",ru:"Pro активирован 🎉",es:"Pro activado 🎉"},
+    restore:{en:"Restore purchase",ru:"Восстановить покупку",es:"Restaurar compra"},
+
+    catEntertainment:{en:"Entertainment",ru:"Развлечения",es:"Entretenimiento"},
+    catMusic:{en:"Music",ru:"Музыка",es:"Música"},
+    catAi:{en:"AI",ru:"ИИ",es:"IA"},
+    catProductivity:{en:"Productivity",ru:"Работа",es:"Productividad"},
+    catCloud:{en:"Cloud",ru:"Облако",es:"Nube"},
+    catGaming:{en:"Gaming",ru:"Игры",es:"Juegos"},
+    catHealth:{en:"Health",ru:"Здоровье",es:"Salud"},
+    catEducation:{en:"Education",ru:"Учёба",es:"Educación"},
+    catFinance:{en:"Finance",ru:"Финансы",es:"Finanzas"},
+    catOther:{en:"Other",ru:"Другое",es:"Otro"},
+
+    back:{en:"Back",ru:"Назад",es:"Atrás"},
+    close:{en:"Close",ru:"Закрыть",es:"Cerrar"},
+    cancelledArchive:{en:"Cancelled",ru:"Отменённые",es:"Canceladas"},
+    notifBody:{en:"{name} renews {when} — {price}",ru:"{name}: списание {when} — {price}",es:"{name} se renueva {when} — {price}"},
+  };
+
+  ST.STRINGS = S;
+  ST.lang = () => (ST.state && ST.state.settings.locale) || "en";
+  ST.setLang = (l) => { ST.state.settings.locale = l; ST.save(); };
+  ST.t = (key, params) => {
+    const e = S[key];
+    let s = e ? (e[ST.lang()] || e.en) : key;
+    if (params) for (const k in params) s = s.replaceAll("{"+k+"}", params[k]);
+    return s;
+  };
+  ST.LANGS = [["en","English"],["ru","Русский"],["es","Español"]];
+})();

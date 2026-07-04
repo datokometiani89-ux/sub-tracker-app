@@ -1,0 +1,60 @@
+/* SubTrack preset catalog — ~48 popular services.
+   No trademarked logos: colored tile + category icon (see SPEC §3.2). */
+(function(){
+  const ST = window.ST = window.ST || {};
+  // [id, name, category, brandColor, defaultMonthlyUSD, cancelUrl]
+  const R = [
+    ["netflix","Netflix","entertainment","#E50914",15.49,"https://www.netflix.com/cancelplan"],
+    ["spotify","Spotify","music","#1DB954",11.99,"https://www.spotify.com/account/subscription/"],
+    ["youtube","YouTube Premium","entertainment","#FF0000",13.99,"https://www.youtube.com/paid_memberships"],
+    ["chatgpt","ChatGPT Plus","ai","#10A37F",20,"https://chat.openai.com/#settings"],
+    ["claude","Claude Pro","ai","#D97757",20,"https://claude.ai/settings/billing"],
+    ["icloud","iCloud+","cloud","#0A84FF",2.99,"https://support.apple.com/HT202039"],
+    ["disney","Disney+","entertainment","#113CCF",13.99,"https://www.disneyplus.com/account"],
+    ["max","Max","entertainment","#002BE7",16.99,"https://www.max.com/account"],
+    ["appletv","Apple TV+","entertainment","#2C2C30",9.99,"https://support.apple.com/HT202039"],
+    ["applemusic","Apple Music","music","#FA243C",10.99,"https://support.apple.com/HT202039"],
+    ["appleone","Apple One","cloud","#3A3A3F",19.95,"https://support.apple.com/HT202039"],
+    ["prime","Amazon Prime","entertainment","#00A8E1",14.99,"https://www.amazon.com/mc"],
+    ["hulu","Hulu","entertainment","#1CE783",9.99,"https://secure.hulu.com/account"],
+    ["crunchyroll","Crunchyroll","entertainment","#F47521",7.99,"https://www.crunchyroll.com/account"],
+    ["twitch","Twitch Sub","entertainment","#9146FF",5.99,"https://www.twitch.tv/subscriptions"],
+    ["gemini","Google AI Pro","ai","#4285F4",19.99,"https://one.google.com/plans"],
+    ["copilot","GitHub Copilot","ai","#24292F",10,"https://github.com/settings/billing"],
+    ["midjourney","Midjourney","ai","#7A78FF",10,"https://www.midjourney.com/account"],
+    ["googleone","Google One","cloud","#34A853",1.99,"https://one.google.com/plans"],
+    ["dropbox","Dropbox","cloud","#0061FF",11.99,"https://www.dropbox.com/account/plan"],
+    ["ms365","Microsoft 365","productivity","#D83B01",9.99,"https://account.microsoft.com/services"],
+    ["notion","Notion","productivity","#37352F",10,"https://www.notion.so/my-account"],
+    ["figma","Figma","productivity","#F24E1E",15,"https://www.figma.com/settings"],
+    ["adobe","Adobe CC","productivity","#DA1F26",59.99,"https://account.adobe.com/plans"],
+    ["canva","Canva Pro","productivity","#00C4CC",12.99,"https://www.canva.com/settings/billing"],
+    ["linkedin","LinkedIn Premium","productivity","#0A66C2",29.99,"https://www.linkedin.com/premium/manage"],
+    ["psplus","PlayStation Plus","gaming","#0070D1",9.99,"https://www.playstation.com/support/subscriptions/"],
+    ["gamepass","Xbox Game Pass","gaming","#107C10",10.99,"https://account.microsoft.com/services"],
+    ["nintendo","Nintendo Online","gaming","#E60012",3.99,"https://accounts.nintendo.com/"],
+    ["duolingo","Duolingo Super","education","#58CC02",6.99,"https://www.duolingo.com/settings/super"],
+    ["headspace","Headspace","health","#F47D31",12.99,"https://www.headspace.com/settings"],
+    ["calm","Calm","health","#4A90D9",14.99,"https://www.calm.com/account"],
+    ["strava","Strava","health","#FC4C02",11.99,"https://www.strava.com/account"],
+    ["fitbit","Fitbit Premium","health","#00B0B9",9.99,"https://www.fitbit.com/settings"],
+    ["tinder","Tinder Gold","other","#FE3C72",24.99,"https://tinder.com/app/settings"],
+    ["audible","Audible","education","#F8991C",14.95,"https://www.audible.com/account"],
+    ["kindle","Kindle Unlimited","education","#FF9900",11.99,"https://www.amazon.com/kindleunlimited"],
+    ["medium","Medium","education","#3A3A3F",5,"https://medium.com/me/settings"],
+    ["patreon","Patreon","other","#FF424D",5,"https://www.patreon.com/settings/memberships"],
+    ["nordvpn","NordVPN","cloud","#4687FF",12.99,"https://my.nordaccount.com/"],
+    ["expressvpn","ExpressVPN","cloud","#DA3940",12.95,"https://www.expressvpn.com/subscriptions"],
+    ["1password","1Password","cloud","#0094F5",2.99,"https://my.1password.com/billing"],
+    ["telegram","Telegram Premium","other","#229ED9",4.99,"https://t.me/settings"],
+    ["discord","Discord Nitro","other","#5865F2",9.99,"https://discord.com/settings/subscriptions"],
+    ["xpremium","X Premium","other","#2C2C30",8,"https://twitter.com/settings/subscriptions"],
+    ["deezer","Deezer","music","#A238FF",11.99,"https://www.deezer.com/account"],
+    ["tidal","TIDAL","music","#121214",10.99,"https://tidal.com/account"],
+    ["soundcloud","SoundCloud Go","music","#FF5500",4.99,"https://soundcloud.com/settings/subscription"],
+  ];
+  ST.PRESETS = R.map(r=>({id:r[0], name:r[1], category:r[2], color:r[3], priceUSD:r[4], cancelUrl:r[5]}));
+  ST.preset = id => ST.PRESETS.find(p=>p.id===id);
+  // shown on onboarding + top of Add screen
+  ST.POPULAR = ["netflix","spotify","youtube","chatgpt","icloud","prime","disney","applemusic","gamepass","duolingo","claude","googleone"];
+})();

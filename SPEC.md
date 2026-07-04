@@ -242,7 +242,7 @@ state = {
 | Cloud backup | — | ✓ |
 | Ads | banner Insights-ზე | No ads |
 
-**ფასი:** $1.99/mo · $14.99/yr (–37%) · $29.99 lifetime (ეტაპი 1-ში lifetime-ს ვუწევთ წინ — impulse buy)
+**ფასი:** **$0.99/mo** · **$4.99 lifetime** (lifetime წინ — impulse buy, ფასი განგებ დაბალია მოცულობისთვის)
 **Paywall მომენტები:** მე-6 subscription-ის დამატებისას · Insights-ის დაბლოკილ ბლოკზე tap · Settings ბანერი. Paywall = ერთი ეკრანი, სამივე ფასით, "Restore purchase"-ით.
 
 ---

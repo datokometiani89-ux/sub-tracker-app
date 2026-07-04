@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "subtrack",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "8022", "--directory", "/Users/macbookprom1/Documents/GitHub/SUB Tracker APP"],
+      "port": 8022
+    }
+  ]
+}
