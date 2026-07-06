@@ -159,6 +159,7 @@ input[type=date]{color-scheme:dark}
 .cta:disabled{opacity:.35}
 .cta.ghost{background:var(--card2);color:var(--txt);border:0.5px solid var(--line2);font-weight:500}
 .cta svg{width:18px;height:18px;vertical-align:-4px;margin-right:6px}
+.form .cta{margin-left:0;margin-right:0;width:100%}   /* full-width inside padded form, no overflow */
 
 /* detail */
 .dhead{display:flex;flex-direction:column;align-items:center;padding:10px 22px 0;gap:10px}
