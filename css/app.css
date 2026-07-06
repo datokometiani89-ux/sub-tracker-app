@@ -128,6 +128,7 @@ input[type=date]{color-scheme:dark}
 .rowbtn{margin:8px 22px;display:block;width:calc(100% - 44px);background:var(--card);
   border:0.5px solid var(--line2);border-radius:14px;padding:14px;text-align:center;
   font-size:14px;font-weight:500;color:var(--txt)}
+.rowbtn svg{width:16px;height:16px;vertical-align:-3px;margin-right:6px}
 
 /* forms */
 .form{padding:16px 22px;display:flex;flex-direction:column;gap:14px}
@@ -264,6 +265,23 @@ input[type=date]{color-scheme:dark}
 .curgrid button{padding:10px 16px;border-radius:var(--r-pill);background:var(--card2);
   border:0.5px solid var(--line2);font-size:14px;color:var(--mut);font-weight:500}
 .curgrid button.on{background:var(--lime);color:var(--lime-ink);border-color:var(--lime);font-weight:700}
+
+/* magic import */
+textarea{font:inherit;color:var(--txt);background:var(--card2);border:0.5px solid var(--line2);
+  border-radius:12px;padding:12px 14px;width:100%;outline:none;resize:vertical;line-height:1.5}
+textarea:focus{border-color:var(--lime)}
+.imp-actions{display:flex;gap:8px;padding:14px 22px 0}
+.imp-chip{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:11px;
+  background:var(--card);border:0.5px solid var(--line2);border-radius:12px;font-size:13px;font-weight:500;color:var(--txt)}
+.imp-chip svg{width:15px;height:15px;color:var(--lime)}
+.imp-cta{border-color:var(--lime)!important;color:var(--lime)!important;display:flex;align-items:center;justify-content:center;gap:8px}
+.imp-cta svg{width:17px;height:17px;vertical-align:-3px}
+.imp-pick{cursor:pointer}
+.imp-pick .imp-check{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--line2);
+  display:flex;align-items:center;justify-content:center;flex:none;margin-left:8px}
+.imp-pick .imp-check svg{width:14px;height:14px;color:var(--lime-ink)}
+.imp-pick.on{border-color:var(--lime)}
+.imp-pick.on .imp-check{background:var(--lime);border-color:var(--lime)}
 
 /* icon + color pickers */
 .iconrow{display:flex;flex-wrap:wrap;gap:8px}

@@ -54,6 +54,7 @@
         </div>
         <div class="grow"></div>
         <button class="cta" id="obGo" style="position:static;width:100%;margin:10px 0 0" disabled>${t("onbStart")}</button>
+        <button class="cta ghost" id="obImport" style="position:static;width:100%;margin:10px 0 0">${icon("sparkles")} ${t("importAuto")}</button>
         <button style="margin-top:12px;color:var(--dim);font-size:13px;width:100%" id="obSkip">${t("onbSkip")}</button>
       </div>
     `, root => {
@@ -99,6 +100,10 @@
         location.hash = "#/";
       };
       go.onclick = () => finish(true);
+      root.querySelector("#obImport").onclick = () => {
+        ST.state.settings.currency = cur; ST.state.meta.onboarded = true; ST.save();
+        location.hash = "#/import";
+      };
       root.querySelector("#obSkip").onclick = () => finish(false);
       refresh();
     });
@@ -252,6 +257,7 @@
         <button class="back" onclick="ST.back()">${icon("chevL")}${t("back")}</button>
         <div class="hdr" style="padding-top:8px"><h1>${t("add")}</h1></div>
         <div class="searchbox">${icon("search")}<input id="q" placeholder="${t("search")}" autocomplete="off"></div>
+        <button class="rowbtn imp-cta" onclick="location.hash='#/import'">${icon("sparkles")} ${t("importAuto")}</button>
         <div class="pregrid" id="grid">${list()}</div>
         <button class="rowbtn" onclick="location.hash='#/add/custom'">${t("addCustom")}</button>
       </div>
@@ -599,6 +605,102 @@
         </div>
       </div>
     `);
+  };
+
+  /* ============ MAGIC IMPORT ============ */
+  ST.screens.import = () => {
+    let found = [];   // parsed candidates
+    ST.mount(`
+      <div class="screen">
+        <button class="back" onclick="ST.back()">${icon("chevL")}${t("back")}</button>
+        <div class="hdr" style="padding-top:8px"><h1>${t("importTitle")}</h1></div>
+        <p style="padding:2px 22px 0;font-size:13px;color:var(--mut);line-height:1.5">${t("importSub")}</p>
+
+        <div class="imp-actions">
+          <button class="imp-chip" id="impPlay">${icon("ext")}${t("importOpenPlay")}</button>
+          <button class="imp-chip" id="impGmail">${icon("search")}${t("importOpenGmail")}</button>
+        </div>
+
+        <div class="form" style="padding-top:8px">
+          <textarea id="impText" rows="7" placeholder="${t("importPaste")}"></textarea>
+          <button class="rowbtn" id="impScan" style="width:100%;margin:0">${icon("plus")} ${t("importScan")}</button>
+          <input type="file" id="impFile" accept="image/*" capture="environment" style="display:none">
+          <div id="impProg" style="display:none;font-size:12px;color:var(--mut);text-align:center"></div>
+          <button class="cta" style="position:static;width:100%" id="impFind">${t("importFind")}</button>
+        </div>
+
+        <div id="impResults"></div>
+      </div>
+    `, root => {
+      root.querySelector("#impPlay").onclick  = () => window.open(ST.PLAY_SUBS, "_blank");
+      root.querySelector("#impGmail").onclick = () => window.open(ST.GMAIL_SEARCH, "_blank");
+
+      const prog = root.querySelector("#impProg");
+      const fileIn = root.querySelector("#impFile");
+      root.querySelector("#impScan").onclick = () => fileIn.click();
+      fileIn.onchange = () => {
+        const f = fileIn.files[0]; if (!f) return;
+        prog.style.display = "block"; prog.textContent = t("importScanning");
+        ST.runOCR(f, p => prog.textContent = t("importScanning")+" "+Math.round(p*100)+"%")
+          .then(txt => {
+            const ta = root.querySelector("#impText");
+            ta.value = (ta.value ? ta.value+"\n" : "") + txt;
+            prog.style.display = "none";
+            root.querySelector("#impFind").click();
+          })
+          .catch(() => { prog.textContent = t("importOcrFail"); });
+      };
+
+      root.querySelector("#impFind").onclick = () => {
+        found = ST.parseImport(root.querySelector("#impText").value || "");
+        renderResults();
+      };
+
+      const results = root.querySelector("#impResults");
+      const renderResults = () => {
+        if (!found.length) {
+          results.innerHTML = `<div class="calempty">${t("importNone")}</div>
+            <button class="rowbtn" onclick="location.hash='#/add/custom'">${t("addCustom")}</button>`;
+          return;
+        }
+        const sel = new Set(found.map((_,i)=>i));
+        const draw = () => {
+          results.innerHTML = `
+            <div class="sect"><div class="t">${t("importFoundN",{n:found.length})}</div></div>
+            <div class="sublist">${found.map((c,i)=>{
+              const cyc = c.cycle.unit==="year"?t("year"):c.cycle.unit==="week"?t("week"):c.cycle.n===3?t("months3"):t("month");
+              return `<div class="subcard imp-pick ${sel.has(i)?'on':''}" data-i="${i}">
+                ${ST.tile(c.color,c.category,"",c.icon)}
+                <span style="flex:1"><span class="nm">${esc(c.name)}</span>
+                  <span class="dt" style="display:block">${ST.fmtDate(c.nextBilling)} · ${cyc.toLowerCase()}</span></span>
+                <span class="pr">${ST.fmtMoney(c.price,{cur:c.currency})}</span>
+                <span class="imp-check">${sel.has(i)?icon("check"):""}</span>
+              </div>`;
+            }).join("")}</div>
+            <button class="cta" style="position:static;width:100%" id="impAdd">${t("importAddN",{n:sel.size})}</button>`;
+          results.querySelectorAll(".imp-pick").forEach(el => el.onclick = () => {
+            const i = +el.dataset.i; sel.has(i)?sel.delete(i):sel.add(i); draw();
+          });
+          const add = results.querySelector("#impAdd");
+          if (add) add.onclick = () => {
+            let n = 0;
+            for (const i of sel) {
+              if (ST.atFreeLimit()) { location.hash="#/pro"; return; }
+              const c = found[i];
+              ST.state.subs.push(ST.newSub({
+                presetId:c.presetId, name:c.name, category:c.category, color:c.color, icon:c.icon,
+                price:c.price, currency:c.currency, cycle:c.cycle, nextBilling:c.nextBilling,
+                priceHistory:[{date:ST.todayISO(), price:c.price}],
+              }));
+              n++;
+            }
+            ST.save(); ST.toast(t("importedN",{n})); ST.askNotifPermission();
+            location.hash = "#/";
+          };
+        };
+        draw();
+      };
+    });
   };
 
   /* ============ CALENDAR ============ */
