@@ -38,10 +38,16 @@
   ST.reset = () => { localStorage.removeItem(KEY); ST.state = defaults(); };
 
   ST.FREE_LIMIT = 5;
+  // Pro is HIDDEN for the first store release (billing not wired yet). Flip to
+  // true to re-enable the paywall, limits and lock badges in one place.
+  ST.PRO_ENABLED = false;
   ST.isPro = () => !!ST.state.pro.active;
+  // is a premium feature available to the user right now?
+  ST.unlocked = () => !ST.PRO_ENABLED || ST.isPro();
   ST.activeSubs = () => ST.state.subs.filter(s=>s.status==="active");
-  // free-tier limit counts paused too, else pausing bypasses the cap
-  ST.atFreeLimit = () => !ST.isPro() &&
+  // free-tier limit counts paused too, else pausing bypasses the cap.
+  // when Pro is hidden everything is free → no cap.
+  ST.atFreeLimit = () => ST.PRO_ENABLED && !ST.isPro() &&
     ST.state.subs.filter(s=>s.status!=="cancelled").length >= ST.FREE_LIMIT;
   ST.subById = id => ST.state.subs.find(s=>s.id===id);
 

@@ -325,7 +325,7 @@
   /* per-sub currency select — multi-currency is a Pro perk */
   const curSel = (id, val) => {
     const opts = ST.CURRENCIES.map(c=>`<option ${c===val?"selected":""}>${c}</option>`).join("");
-    return ST.isPro()
+    return ST.unlocked()
       ? `<select id="${id}">${opts}</select>`
       : `<span class="curlock" data-golock><select id="${id}" disabled>${opts}</select><span class="lk">${icon("lock")}</span></span>`;
   };
@@ -545,7 +545,7 @@
     const unused = ST.unusedSubs();
     const cats = ST.categoryBreakdown();
     const mTotal = ST.monthlyTotal();
-    const pro = ST.isPro();
+    const pro = ST.unlocked();
     const lock = pro ? "" : `<div class="lock" onclick="location.hash='#/pro'">${icon("lock")}<span>${t("unlockPro")}</span></div>`;
 
     ST.mount(`
@@ -839,7 +839,7 @@
       <div class="screen">
         <div class="hdr"><h1>${t("settings")}</h1></div>
 
-        ${ST.isPro() ? `
+        ${!ST.PRO_ENABLED ? "" : ST.isPro() ? `
         <div class="probanner"><div class="mark" style="width:44px;height:44px;border-radius:13px;background:var(--lime);display:flex;align-items:center;justify-content:center;color:var(--lime-ink)">${icon("sparkles")}</div>
           <div><div class="tt">${t("proActive")}</div><div class="ss">${ST.state.pro.plan==="lifetime"?t("pwLifetime"):t("pwMonthly")}</div></div></div>` : `
         <button class="probanner" style="width:calc(100% - 44px)" onclick="location.hash='#/pro'">
@@ -875,9 +875,9 @@
 
         <div class="setgroup">
           <button class="setrow" id="sExport"><span class="ic" style="background:#0F1F14;color:#34C759">${icon("download")}</span>
-            <span class="t">${t("exportJson")}</span>${ST.isPro()?"":icon("lock","")}</button>
+            <span class="t">${t("exportJson")}</span>${ST.unlocked()?"":icon("lock","")}</button>
           <button class="setrow" id="sCsv"><span class="ic" style="background:#0F1F14;color:#34C759">${icon("download")}</span>
-            <span class="t">${t("exportCsv")}</span>${ST.isPro()?"":icon("lock","")}</button>
+            <span class="t">${t("exportCsv")}</span>${ST.unlocked()?"":icon("lock","")}</button>
           <button class="setrow" id="sImport"><span class="ic" style="background:#101B2A;color:#5AC8FA">${icon("upRight")}</span>
             <span class="t">${t("importCsv")}</span></button>
           <input type="file" id="sImportFile" accept=".csv,text/csv" style="display:none">
@@ -902,13 +902,13 @@
         ST.save(); b.classList.toggle("on", ST.state.settings.reminders[k]);
       });
       root.querySelector("#sExport").onclick = () => {
-        if (!ST.isPro()) { location.hash="#/pro"; return; }
+        if (!ST.unlocked()) { location.hash="#/pro"; return; }
         const blob = new Blob([JSON.stringify(ST.state,null,2)],{type:"application/json"});
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob); a.download = "subtrack-export.json"; a.click();
       };
       root.querySelector("#sCsv").onclick = () => {
-        if (!ST.isPro()) { location.hash="#/pro"; return; }
+        if (!ST.unlocked()) { location.hash="#/pro"; return; }
         const head = "name,price,currency,cycleUnit,cycleN,nextBilling,category,status,startedAt,notes";
         const q = v => { v=String(v??""); return /[",\n]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v; };
         const rows = ST.state.subs.map(s=>[s.name,s.price,s.currency,s.cycle.unit,s.cycle.n,
@@ -1141,6 +1141,7 @@
 
   /* ============ PAYWALL ============ */
   ST.screens.pro = () => {
+    if (!ST.PRO_ENABLED) { location.hash = "#/"; return; }
     ST.mount(`
       <div class="screen">
         <button class="back" onclick="ST.back()">${icon("chevL")}${t("back")}</button>
