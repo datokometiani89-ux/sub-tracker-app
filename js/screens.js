@@ -848,6 +848,16 @@
           <div style="margin-left:auto;color:var(--lime)">${icon("chevR")}</div></button>`}
 
         <div class="setgroup">
+          ${ST.auth.isSignedIn() ? `
+          <button class="setrow" onclick="location.hash='#/account'"><span class="ic" style="background:var(--lime);color:var(--lime-ink)">${esc((ST.state.account.name||"?")[0].toUpperCase())}</span>
+            <span class="t">${esc(ST.state.account.name||t("account"))}</span>
+            <span class="val">${esc(ST.state.account.primaryEmail)}</span>${icon("chevR")}</button>` : `
+          <button class="setrow" onclick="location.hash='#/auth'"><span class="ic" style="background:#101B2A;color:#5AC8FA">${icon("user")}</span>
+            <span class="t">${t("signIn")}</span>
+            <span class="val">${t("backupStatus")}</span>${icon("chevR")}</button>`}
+        </div>
+
+        <div class="setgroup">
           <div class="setrow"><span class="ic" style="background:#12210A;color:var(--lime)">${icon("coins")}</span>
             <span class="t">${t("currency")}</span>
             <select id="sCur">${CURR.map(c=>`<option ${c===st.currency?"selected":""}>${c}</option>`).join("")}</select></div>
@@ -874,7 +884,14 @@
           <button class="setrow" id="sErase"><span class="ic" style="background:#2A1210;color:var(--red)">${icon("trash")}</span>
             <span class="t" style="color:var(--red)">${t("erase")}</span></button>
         </div>
-        <div class="demo-note" style="padding:0 26px">SubTrack v1 · local-first, your data never leaves this device.</div>
+
+        <div class="setgroup">
+          <button class="setrow" onclick="location.hash='#/privacy'"><span class="ic" style="background:var(--card2);color:var(--mut)">${icon("lock")}</span>
+            <span class="t">${t("privacyPolicy")}</span>${icon("chevR")}</button>
+          <button class="setrow" onclick="location.hash='#/terms'"><span class="ic" style="background:var(--card2);color:var(--mut)">${icon("book")}</span>
+            <span class="t">${t("terms")}</span>${icon("chevR")}</button>
+        </div>
+        <div class="demo-note" style="padding:0 26px">SubTrack v1 · local-first, your data stays on your device.</div>
       </div>
     `, root => {
       root.querySelector("#sCur").onchange = e => { ST.state.settings.currency = e.target.value; ST.save(); ST.render(); };
@@ -936,6 +953,191 @@
       };
     });
   };
+
+  /* ============ AUTH ============ */
+  ST.screens.auth = () => {
+    ST.mount(`
+      <div class="screen">
+        <button class="back" onclick="ST.back()">${icon("chevL")}${t("back")}</button>
+        <div class="paywall" style="padding-top:20px">
+          <div class="mark">${icon("user")}</div>
+          <h2>${t("signIn")}</h2>
+          <div class="sub">${t("authSub")}</div>
+          <div class="plans" style="margin-top:22px">
+            <button class="authbtn" data-p="google">${ST.brandGlyph("google")}${t("contGoogle")}</button>
+            <button class="authbtn" data-p="apple">${ST.brandGlyph("apple")}${t("contApple")}</button>
+            <button class="authbtn" data-p="email">${icon("mail")||icon("user")} ${t("contEmail")}</button>
+          </div>
+          <div class="demo-note">${t("demoAuthNote")}</div>
+        </div>
+      </div>
+    `, root => {
+      root.querySelectorAll("[data-p]").forEach(b => b.onclick = () => openAuthSheet(b.dataset.p));
+    });
+  };
+
+  const openAuthSheet = (provider) => {
+    // OAuth providers imply a verified email; demo just asks which address.
+    const isOAuth = provider!=="email";
+    ST.sheet(`
+      <div class="form">
+        <div style="text-align:center;margin-bottom:4px">${ST.brandGlyph(provider)||icon("user")}</div>
+        <div><label>${t("emailAddr")}</label>
+          <input id="authEmail" type="email" inputmode="email" autocomplete="email"
+            placeholder="you@${provider==="apple"?"icloud.com":"gmail.com"}"></div>
+        <div id="authStep2" style="display:none">
+          <label>${t("enterCode")}</label>
+          <input id="authCode" inputmode="numeric" maxlength="6" placeholder="000000">
+          <div id="authDemo" class="demo-note" style="text-align:left;margin-top:8px"></div>
+        </div>
+        <button class="cta" style="position:static;width:100%" id="authGo">${isOAuth?t("signIn"):t("sendCode")}</button>
+      </div>
+    `, w => {
+      const emailEl = w.querySelector("#authEmail");
+      const go = w.querySelector("#authGo");
+      let step = 1;
+      go.onclick = () => {
+        const email = (emailEl.value||"").trim().toLowerCase();
+        if (!ST.auth.emailValid(email)) { ST.toast(t("emailAddr")); return; }
+        if (isOAuth) return finishAuth(email, provider);      // OAuth = instant verified
+        if (step===1) {
+          const code = ST.auth.sendCode(email);
+          w.querySelector("#authStep2").style.display = "block";
+          w.querySelector("#authDemo").textContent = t("demoCode",{c:code});
+          emailEl.disabled = true; go.textContent = t("verify"); step = 2;
+        } else {
+          if (!ST.auth.checkCode(email, w.querySelector("#authCode").value)) { ST.toast(t("badCode")); return; }
+          finishAuth(email, "email");
+        }
+      };
+    });
+  };
+
+  const finishAuth = (email, provider) => {
+    const { cloud } = ST.auth.signIn(email, provider);
+    const localCount = ST.state.subs.length;
+    ST.closeSheets();
+    if (cloud && cloud.subs && cloud.subs.length && localCount) {
+      // guest data + existing backup → ask merge / replace / keep
+      ST.sheet(`
+        <div class="form">
+          <div class="dhead"><h2 style="font-size:19px">${t("welcomeBack")}</h2></div>
+          <p style="font-size:13px;color:var(--mut);line-height:1.5;text-align:center">${t("foundCloud",{n:localCount})}</p>
+          <button class="cta" style="position:static;width:100%" id="mMerge">${t("mergeBoth")}</button>
+          <button class="cta ghost" style="position:static;width:100%" id="mCloud">${t("useCloud")}</button>
+          <button class="cta ghost" style="position:static;width:100%" id="mLocal">${t("keepLocal")}</button>
+        </div>
+      `, w => {
+        w.querySelector("#mMerge").onclick = () => { ST.auth.mergeCloud(cloud); done(); };
+        w.querySelector("#mCloud").onclick = () => { ST.auth.replaceWithCloud(cloud); done(); };
+        w.querySelector("#mLocal").onclick = () => { ST.auth.syncNow(); done(); };
+      });
+    } else {
+      if (cloud && cloud.subs && cloud.subs.length) ST.auth.replaceWithCloud(cloud);
+      else ST.auth.syncNow();
+      done();
+    }
+    function done(){ ST.closeSheets(); ST.toast(t("welcomeBack")); location.hash = "#/account"; }
+  };
+
+  /* ============ ACCOUNT ============ */
+  ST.screens.account = () => {
+    if (!ST.auth.isSignedIn()) { location.hash = "#/auth"; return; }
+    const acc = ST.state.account;
+    ST.mount(`
+      <div class="screen">
+        <button class="back" onclick="ST.back()">${icon("chevL")}${t("back")}</button>
+        <div class="dhead" style="padding-top:6px">
+          <div class="tile" style="width:64px;height:64px;border-radius:50%;background:var(--lime);color:var(--lime-ink);font-size:26px">${esc((acc.name||"?")[0].toUpperCase())}</div>
+          <h2>${esc(acc.name||acc.primaryEmail)}</h2>
+          <div class="cat">${t("signedInAs")} ${esc(acc.primaryEmail)}</div>
+        </div>
+
+        <div class="setgroup" style="margin-top:20px">
+          <div class="setrow"><span class="ic" style="background:#12210A;color:var(--lime)">${icon("check")}</span>
+            <span class="t">${t("backupStatus")}</span>
+            <span class="val">${acc.backedUpAt?t("backedUpAt",{t:ST.relTime(acc.backedUpAt)}):t("notBackedUp")}</span></div>
+          <button class="setrow" id="aSync"><span class="ic" style="background:#101B2A;color:#5AC8FA">${icon("refresh")||icon("download")}</span>
+            <span class="t">${t("syncNow")}</span></button>
+        </div>
+
+        <div class="sect"><div class="t">${t("linkedEmails")}<em>${acc.emails.length}</em></div></div>
+        <div style="font-size:12px;color:var(--dim);padding:0 22px 8px;line-height:1.5">${t("linkedSub")}</div>
+        <div class="setgroup" style="margin-top:0">
+          ${acc.emails.map(e=>`
+            <div class="setrow"><span class="ic" style="background:var(--card2)">${ST.brandGlyph(e.provider)||icon("mail")||icon("user")}</span>
+              <span class="t" style="font-weight:400">${esc(e.address)}</span>
+              ${e.address===acc.primaryEmail
+                ? `<span class="val" style="color:var(--lime)">${t("primaryTag")}</span>`
+                : `<button data-rm="${esc(e.address)}" style="color:var(--red)">${icon("x")}</button>`}
+            </div>`).join("")}
+          <button class="setrow" id="aAdd"><span class="ic" style="background:#12210A;color:var(--lime)">${icon("plus")}</span>
+            <span class="t">${t("addEmail")}</span></button>
+        </div>
+
+        <div class="setgroup">
+          <button class="setrow" id="aOut"><span class="ic" style="background:var(--card2);color:var(--mut)">${icon("chevL")}</span>
+            <span class="t">${t("signOut")}</span></button>
+          <button class="setrow" id="aDel"><span class="ic" style="background:#2A1210;color:var(--red)">${icon("trash")}</span>
+            <span class="t" style="color:var(--red)">${t("deleteAccount")}</span></button>
+        </div>
+      </div>
+    `, root => {
+      root.querySelector("#aSync").onclick = () => { ST.auth.syncNow(); ST.save(); ST.toast("✓"); ST.render(); };
+      root.querySelector("#aAdd").onclick = () => openAddEmailSheet();
+      root.querySelectorAll("[data-rm]").forEach(b => b.onclick = () => { ST.auth.removeEmail(b.dataset.rm); ST.render(); });
+      root.querySelector("#aOut").onclick = () => { ST.auth.signOut(); location.hash = "#/settings"; };
+      root.querySelector("#aDel").onclick = () => {
+        if (!confirm(t("delAccConfirm"))) return;
+        const wipe = confirm(t("delAll") + "?\n\nOK = " + t("delAll") + "\nCancel = " + t("delKeepData"));
+        ST.auth.deleteAccount(wipe);
+        ST.toast(t("accDeleted")); location.hash = "#/";
+      };
+    });
+  };
+
+  const openAddEmailSheet = () => {
+    ST.sheet(`
+      <div class="form">
+        <div><label>${t("emailAddr")}</label>
+          <input id="aeEmail" type="email" inputmode="email" placeholder="another@email.com"></div>
+        <div id="aeStep2" style="display:none">
+          <label>${t("enterCode")}</label>
+          <input id="aeCode" inputmode="numeric" maxlength="6" placeholder="000000">
+          <div id="aeDemo" class="demo-note" style="text-align:left;margin-top:8px"></div>
+        </div>
+        <button class="cta" style="position:static;width:100%" id="aeGo">${t("sendCode")}</button>
+      </div>
+    `, w => {
+      let step = 1;
+      const go = w.querySelector("#aeGo"), emailEl = w.querySelector("#aeEmail");
+      go.onclick = () => {
+        const email = (emailEl.value||"").trim().toLowerCase();
+        if (!ST.auth.emailValid(email)) { ST.toast(t("emailAddr")); return; }
+        if (email === ST.state.account.primaryEmail) { ST.toast(t("primaryTag")); return; }
+        if (step===1) {
+          const code = ST.auth.sendCode(email);
+          w.querySelector("#aeStep2").style.display = "block";
+          w.querySelector("#aeDemo").textContent = t("demoCode",{c:code});
+          emailEl.disabled = true; go.textContent = t("verify"); step = 2;
+        } else {
+          if (!ST.auth.checkCode(email, w.querySelector("#aeCode").value)) { ST.toast(t("badCode")); return; }
+          ST.auth.addVerifiedEmail(email, "email");
+          ST.closeSheets(); ST.render();
+        }
+      };
+    });
+  };
+
+  /* ============ LEGAL ============ */
+  const legalPage = (title, body) => ST.mount(`
+    <div class="screen">
+      <button class="back" onclick="ST.back()">${icon("chevL")}${t("back")}</button>
+      <div class="hdr" style="padding-top:8px"><h1>${title}</h1></div>
+      <div class="legal-body">${body}</div>
+    </div>`);
+  ST.screens.privacy = () => legalPage(t("privacyPolicy"), ST.LEGAL.privacy());
+  ST.screens.terms   = () => legalPage(t("terms"), ST.LEGAL.terms());
 
   /* ============ PAYWALL ============ */
   ST.screens.pro = () => {

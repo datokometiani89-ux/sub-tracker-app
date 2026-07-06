@@ -40,6 +40,8 @@
     selector:'<path d="m8 9 4-4 4 4M8 15l4 4 4-4"/>',
     sparkles:'<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9z"/>',
     share:'<path d="M12 3v12M8 7l4-4 4 4"/><path d="M6 11v8a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-8"/>',
+    mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
+    refresh:'<path d="M4 12a8 8 0 0 1 14-5l2 2M20 12a8 8 0 0 1-14 5l-2-2"/><path d="M18 4v5h-5M6 20v-5h5"/>',
   };
   ST.icon = (name, cls) =>
     `<svg class="${cls||''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[name]||P.dots}</svg>`;
@@ -80,6 +82,13 @@
   };
 
   ST.esc = s => String(s??"").replace(/[&<>"']/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+
+  /* brand glyphs for auth (Google 4-colour G, Apple mark). null = not a brand */
+  ST.brandGlyph = (provider) => {
+    if (provider==="google") return '<svg viewBox="0 0 48 48" width="18" height="18" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9 3.6l6.7-6.7C35.9 2.4 30.3 0 24 0 14.6 0 6.4 5.4 2.5 13.3l7.8 6.1C12.2 13.2 17.6 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.5 3-2.2 5.5-4.7 7.2l7.3 5.7C43.6 38 46.5 31.8 46.5 24.5z"/><path fill="#FBBC05" d="M10.3 28.6c-.5-1.4-.8-3-.8-4.6s.3-3.2.8-4.6l-7.8-6.1C.9 16.5 0 20.1 0 24s.9 7.5 2.5 10.7l7.8-6.1z"/><path fill="#34A853" d="M24 48c6.3 0 11.6-2.1 15.5-5.7l-7.3-5.7c-2 1.4-4.7 2.3-8.2 2.3-6.4 0-11.8-3.7-13.7-8.9l-7.8 6.1C6.4 42.6 14.6 48 24 48z"/></svg>';
+    if (provider==="apple") return '<svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor" aria-hidden="true"><path d="M16.36 12.6c.02 2.5 2.2 3.33 2.22 3.34-.02.06-.35 1.2-1.15 2.37-.69 1.02-1.4 2.03-2.53 2.05-1.1.02-1.46-.65-2.72-.65s-1.65.63-2.7.67c-1.08.04-1.9-1.1-2.6-2.11-1.42-2.06-2.5-5.82-1.05-8.36.72-1.26 2.01-2.06 3.41-2.08 1.07-.02 2.08.72 2.72.72.65 0 1.87-.89 3.16-.76.54.02 2.05.22 3.02 1.64-.08.05-1.8 1.05-1.78 3.13M14.13 4.5c.57-.69.95-1.65.85-2.6-.82.03-1.81.55-2.4 1.24-.53.61-1 1.59-.87 2.52.91.07 1.85-.46 2.42-1.16"/></svg>';
+    return null;
+  };
 
   /* --- money / dates --- */
   ST.fmtMoney = (v, opts) => {
@@ -144,6 +153,15 @@
     }
     document.body.appendChild(c);
     setTimeout(()=>c.remove(), 2600);
+  };
+
+  ST.relTime = (iso) => {
+    if (!iso) return "";
+    const s = Math.max(1, (Date.now() - new Date(iso).getTime())/1000);
+    if (s < 60) return "just now";
+    const m = s/60; if (m < 60) return Math.floor(m)+"m ago";
+    const h = m/60; if (h < 24) return Math.floor(h)+"h ago";
+    return Math.floor(h/24)+"d ago";
   };
 
   ST.uuid = () => (crypto.randomUUID ? crypto.randomUUID() :

@@ -14,6 +14,8 @@
     subs: [],       // see SPEC.md data model
     fx: { rates:null, fetchedAt:null },   // USD-based rates from open.er-api.com
     pro: { active:false, plan:null, since:null },
+    // account: null = guest (local-only). emails[] = linked & verified identities.
+    account: null,  // { id, name, primaryEmail, provider, emails:[{address,provider,verified,addedAt}], backedUpAt }
     meta: { installedAt: new Date().toISOString(), onboarded:false, lastNotifCheck:null },
   });
 
@@ -29,7 +31,10 @@
     } catch(e){}
     ST.state = defaults();
   };
-  ST.save = () => { try { localStorage.setItem(KEY, JSON.stringify(ST.state)); } catch(e){} };
+  ST.save = () => {
+    try { localStorage.setItem(KEY, JSON.stringify(ST.state)); } catch(e){}
+    if (ST.auth && ST.auth.onSaved) ST.auth.onSaved();   // push to cloud when signed in
+  };
   ST.reset = () => { localStorage.removeItem(KEY); ST.state = defaults(); };
 
   ST.FREE_LIMIT = 5;

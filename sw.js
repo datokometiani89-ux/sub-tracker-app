@@ -1,10 +1,10 @@
 /* SubTrack service worker — cache-first shell */
-const CACHE = "subtrack-v6";
+const CACHE = "subtrack-v7";
 const SHELL = [
-  "./", "./index.html", "./icon.svg", "./manifest.webmanifest",
-  "./css/app.css?v=6",
-  "./js/i18n.js?v=6", "./js/ui.js?v=6", "./js/state.js?v=6",
-  "./js/presets.js?v=6", "./js/logic.js?v=6", "./js/import.js?v=6", "./js/screens.js?v=6", "./js/app.js?v=6",
+  "./", "./index.html", "./icon.svg", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png", "./manifest.webmanifest",
+  "./css/app.css?v=7",
+  "./js/i18n.js?v=7", "./js/ui.js?v=7", "./js/state.js?v=7", "./js/auth.js?v=7",
+  "./js/presets.js?v=7", "./js/logic.js?v=7", "./js/import.js?v=7", "./js/screens.js?v=7", "./js/app.js?v=7",
 ];
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting()));
