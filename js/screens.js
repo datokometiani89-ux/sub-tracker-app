@@ -244,26 +244,50 @@
   /* ============ ADD ============ */
   ST.screens.add = () => {
     if (ST.atFreeLimit()) { location.hash="#/pro"; return; }
-    let q = "";
+    let q = "", cat = "popular";
+    // category chips: Popular + only categories that actually have presets, by size
+    const catCounts = {};
+    ST.PRESETS.forEach(p => catCounts[p.category] = (catCounts[p.category]||0)+1);
+    const cats = ["popular", ...ST.CATS.map(c=>c.id).filter(id=>catCounts[id])];
+
+    const matches = () => {
+      if (q) return ST.PRESETS.filter(p=>p.name.toLowerCase().includes(q));
+      if (cat==="popular") return ST.POPULAR.map(id=>ST.preset(id));
+      return ST.PRESETS.filter(p=>p.category===cat).sort((a,b)=>a.name.localeCompare(b.name));
+    };
     const list = () => {
-      const match = q ? ST.PRESETS.filter(p=>p.name.toLowerCase().includes(q)) :
-                        ST.POPULAR.map(id=>ST.preset(id));
-      return match.map(p => `<button class="precard" data-p="${p.id}">
+      const m = matches();
+      if (!m.length) return `<div class="calempty" style="grid-column:1/-1">${t("importNone")}</div>`;
+      return m.map(p => `<button class="precard" data-p="${p.id}">
         ${ST.tile(p.color,p.category)}<span class="nm">${esc(p.name)}</span>
         <span class="pr">$${p.priceUSD}${t("perMo")}</span></button>`).join("");
     };
+    const chips = () => cats.map(id => `<button class="catchip ${!q&&cat===id?'on':''}" data-cat="${id}">${id==="popular"?t("popular"):ST.catName(id)}</button>`).join("");
+
     ST.mount(`
       <div class="screen">
         <button class="back" onclick="ST.back()">${icon("chevL")}${t("back")}</button>
         <div class="hdr" style="padding-top:8px"><h1>${t("add")}</h1></div>
-        <div class="searchbox">${icon("search")}<input id="q" placeholder="${t("search")}" autocomplete="off"></div>
+        <div class="searchbox">${icon("search")}<input id="q" placeholder="${t("search")} (${ST.PRESETS.length})" autocomplete="off"></div>
         <button class="rowbtn imp-cta" onclick="location.hash='#/import'">${icon("sparkles")} ${t("importAuto")}</button>
+        <div class="catchips" id="chips">${chips()}</div>
         <div class="pregrid" id="grid">${list()}</div>
         <button class="rowbtn" onclick="location.hash='#/add/custom'">${t("addCustom")}</button>
       </div>
     `, root => {
-      const grid = root.querySelector("#grid");
-      root.querySelector("#q").oninput = e => { q = e.target.value.trim().toLowerCase(); grid.innerHTML = list(); };
+      const grid = root.querySelector("#grid"), chipRow = root.querySelector("#chips");
+      root.querySelector("#q").oninput = e => {
+        q = e.target.value.trim().toLowerCase();
+        chipRow.style.display = q ? "none" : "flex";   // hide chips while searching
+        grid.innerHTML = list();
+      };
+      chipRow.addEventListener("click", e => {
+        const b = e.target.closest("[data-cat]"); if(!b) return;
+        cat = b.dataset.cat;
+        chipRow.querySelectorAll(".catchip").forEach(x=>x.classList.toggle("on", x===b));
+        grid.innerHTML = list();
+        window.scrollTo(0,0);
+      });
       grid.addEventListener("click", e => {
         const b = e.target.closest("[data-p]"); if(!b) return;
         openPresetSheet(ST.preset(b.dataset.p));
