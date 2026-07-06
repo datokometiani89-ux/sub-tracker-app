@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SubTrack — store assets generator</title>
+<style>
+  :root{--bg:#09090B;--card:#141416;--line:#1F1F22;--card2:#161618;--txt:#F5F5F7;--mut:#8E8E93;--dim:#6E6E73;--lime:#D7FF3F;--lime-ink:#0A0A0B;--violet:#7A78FF;--amber:#FF9F0A;}
+  *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,'SF Pro Display',system-ui,Roboto,sans-serif}
+  body{background:#1c1c1f;color:#fff;padding:24px}
+  h1{font-size:20px;margin-bottom:6px}
+  .hint{color:#aaa;font-size:13px;margin-bottom:20px;max-width:720px;line-height:1.5}
+  .tools{margin-bottom:20px}
+  .tools button{background:var(--lime);color:#000;border:none;border-radius:10px;padding:12px 20px;font-size:14px;font-weight:700;cursor:pointer}
+  .asset{margin:28px 0}
+  .asset .lbl{font-size:13px;color:#bbb;margin-bottom:8px;display:flex;gap:12px;align-items:center}
+  .asset .lbl button{background:#2c2c30;color:#fff;border:1px solid #3a3a3f;border-radius:8px;padding:6px 14px;font-size:12px;cursor:pointer}
+  /* on-screen preview: scale into a fixed-height window so frames stack cleanly */
+  .stage-wrap{width:378px;height:672px;overflow:hidden;border-radius:20px}
+  .stage-wrap .shot{transform:scale(.35);transform-origin:top left}
+  .feat-wrap{width:512px;height:250px;overflow:hidden;border-radius:12px}
+  .feat-wrap .feat{transform:scale(.5);transform-origin:top left}
+
+  /* ---- 1080x1920 phone screenshot frame ---- */
+  .shot{width:1080px;height:1920px;position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center}
+  .shot .cap{padding:70px 80px 0;text-align:center}
+  .shot .cap h2{font-size:66px;font-weight:700;letter-spacing:-1.5px;line-height:1.12}
+  .shot .cap h2 em{color:var(--lime);font-style:normal}
+  .shot .cap p{font-size:32px;color:var(--mut);margin-top:20px;font-weight:400}
+  .phone{width:620px;margin-top:70px;background:#000;border-radius:66px;padding:16px;box-shadow:0 40px 120px rgba(0,0,0,.5)}
+  .scr{background:var(--bg);border-radius:52px;overflow:hidden;padding:26px 26px 40px}
+
+  /* mini app components (scaled up for 620px phone) */
+  .m-hd{display:flex;justify-content:space-between;align-items:center;margin:8px 6px 0}
+  .m-hd h3{font-size:34px;font-weight:600}
+  .m-plus{width:52px;height:52px;border-radius:50%;background:var(--lime);color:#000;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:400}
+  .m-seg{display:flex;background:var(--card2);border-radius:16px;padding:5px;margin:22px 6px 0}
+  .m-seg span{flex:1;text-align:center;padding:12px 0;font-size:24px;color:var(--mut);border-radius:12px}
+  .m-seg span.on{background:#2c2c30;color:#fff;font-weight:600}
+  .m-lbl{font-size:20px;color:var(--mut);letter-spacing:2px;text-transform:uppercase;margin:34px 6px 0}
+  .m-num{font-size:104px;font-weight:300;letter-spacing:-3px;margin:2px 6px 0}
+  .m-num .c{font-size:58px;color:var(--dim)}
+  .m-num .p{font-size:30px;color:var(--dim)}
+  .m-chip{display:inline-block;background:#12210A;color:#A8E82A;font-size:22px;font-weight:500;padding:8px 18px;border-radius:99px;margin:8px 6px 0}
+  .m-bar{display:flex;gap:6px;height:14px;margin:30px 6px 0}
+  .m-bar i{border-radius:99px}
+  .m-card{background:var(--card);border:1px solid var(--line);border-radius:30px;padding:26px 28px;margin:26px 6px 0;display:flex;align-items:center;gap:22px}
+  .m-tile{width:74px;height:74px;border-radius:20px;display:flex;align-items:center;justify-content:center;flex:none;font-size:34px}
+  .m-nm{font-size:30px;font-weight:500}
+  .m-dt{font-size:22px;color:var(--mut);margin-top:4px}
+  .m-dt.soon{color:var(--lime)}
+  .m-pr{font-size:30px;font-weight:600;margin-left:auto;text-align:right}
+  .m-review{background:var(--lime);color:#000;font-size:22px;font-weight:700;padding:14px 26px;border-radius:99px;margin-left:auto}
+  .m-ring{width:96px;height:96px;border-radius:50%;border:9px solid #232326;border-top-color:var(--lime);border-right-color:var(--lime);transform:rotate(45deg);flex:none;position:relative}
+  .m-ring b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transform:rotate(-45deg);font-size:26px;font-weight:700}
+  .m-big{font-size:88px;font-weight:300;letter-spacing:-2px;margin:6px 6px 0}
+  .m-big.lime{color:var(--lime)}
+  .m-bars{display:flex;align-items:flex-end;gap:10px;height:150px;margin:30px 6px 0}
+  .m-bars i{flex:1;background:#2c2c30;border-radius:8px}
+  .m-bars i.hi{background:var(--lime)}
+  .m-check{width:44px;height:44px;border-radius:50%;background:var(--lime);color:#000;display:flex;align-items:center;justify-content:center;font-size:26px;margin-left:auto;flex:none}
+  .m-sect{font-size:28px;font-weight:600;margin:34px 6px 12px}
+
+  /* ---- 1024x500 feature graphic ---- */
+  .feat{width:1024px;height:500px;background:var(--bg);position:relative;overflow:hidden;display:flex;align-items:center;padding:0 70px}
+  .feat .txt{flex:1}
+  .feat .badge{display:inline-block;background:#12210A;color:var(--lime);font-size:20px;font-weight:600;padding:8px 18px;border-radius:99px;margin-bottom:22px}
+  .feat h2{font-size:72px;font-weight:700;letter-spacing:-2px;line-height:1.05}
+  .feat h2 em{color:var(--lime);font-style:normal}
+  .feat p{font-size:26px;color:var(--mut);margin-top:22px}
+  .feat .ring{width:300px;height:300px;border-radius:50%;border:34px solid #232326;border-top-color:var(--lime);border-right-color:var(--lime);flex:none;transform:rotate(30deg);position:relative;margin-left:30px}
+  .feat .ring b{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;transform:rotate(-30deg)}
+  .feat .ring .n{font-size:56px;font-weight:300;color:#fff}
+  .feat .ring .s{font-size:22px;color:var(--dim)}
+</style>
+</head>
+<body>
+<h1>SubTrack — store assets</h1>
+<p class="hint">Each frame below is rendered at its exact export resolution (shown scaled down for preview). Click "Download PNG" on any frame to save it at full size — ready to upload to Google Play. Screenshots are 1080×1920; the feature graphic is 1024×500.</p>
+<div class="tools"><button onclick="dlAll()">⬇ Download all</button></div>
+<div id="assets"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+const tile=(bg,ic)=>`<span class="m-tile" style="background:${bg};color:${(function(h){h=h.replace('#','');const r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16);return (0.299*r+0.587*g+0.114*b)>160?'#000':'#fff'})(bg)}">${ic}</span>`;
+
+const SHOTS = [
+  { cap:`Know what you <em>really</em> pay`, sub:`Every subscription, one clear total`, body:`
+    <div class="m-hd"><h3>Subscriptions</h3><span class="m-plus">+</span></div>
+    <div class="m-seg"><span class="on">Monthly</span><span>Yearly</span></div>
+    <div class="m-lbl">Total · July</div>
+    <div class="m-num">$84<span class="c">.97</span> <span class="p">/ mo</span></div>
+    <div class="m-chip">↓ $4.99 vs June</div>
+    <div class="m-bar"><i style="width:40%;background:var(--lime)"></i><i style="width:34%;background:var(--violet)"></i><i style="width:26%;background:#3a3a3f"></i></div>
+    <div class="m-card">${tile('#E50914','▚')}<div><div class="m-nm">Netflix</div><div class="m-dt">Aug 5</div></div><div class="m-pr">$15.49</div></div>
+    <div class="m-card">${tile('#1DB954','♪')}<div><div class="m-nm">Spotify</div><div class="m-dt">Aug 7</div></div><div class="m-pr">$11.99</div></div>` },
+
+  { cap:`Never miss a <em>renewal</em>`, sub:`Reminders before every charge`, body:`
+    <div class="m-hd"><h3>Subscriptions</h3><span class="m-plus">+</span></div>
+    <div class="m-card" style="margin-top:40px;padding:32px 30px"><div class="m-ring"><b>2d</b></div>
+      <div style="flex:1"><div class="m-nm">Spotify renews soon</div><div class="m-dt">$10.99 · in 2 days</div></div>
+      <span class="m-review">Review</span></div>
+    <div class="m-card">${tile('#FF9F0A','⏰')}<div><div class="m-nm">Trial ends tomorrow</div><div class="m-dt soon">Disney+ · then $13.99</div></div></div>
+    <div class="m-card">${tile('#5856D6','▤')}<div><div class="m-nm">ChatGPT Plus</div><div class="m-dt">Jul 24</div></div><div class="m-pr">$20.00</div></div>` },
+
+  { cap:`Add everything in <em>seconds</em>`, sub:`Paste or scan — no email or bank access`, body:`
+    <div class="m-hd"><h3>Magic import</h3></div>
+    <div class="m-sect" style="color:var(--mut);font-weight:400;font-size:24px">Found 6 subscriptions</div>
+    <div class="m-card">${tile('#E50914','▚')}<div><div class="m-nm">Netflix</div><div class="m-dt">$15.49</div></div><span class="m-check">✓</span></div>
+    <div class="m-card">${tile('#1DB954','♪')}<div><div class="m-nm">Spotify</div><div class="m-dt">$11.99</div></div><span class="m-check">✓</span></div>
+    <div class="m-card">${tile('#0A84FF','☁')}<div><div class="m-nm">iCloud+</div><div class="m-dt">$2.99</div></div><span class="m-check">✓</span></div>
+    <div class="m-card">${tile('#10A37F','▤')}<div><div class="m-nm">ChatGPT Plus</div><div class="m-dt">$20.00</div></div><span class="m-check">✓</span></div>` },
+
+  { cap:`See what you'll <em>spend</em>`, sub:`Insights that save you money`, body:`
+    <div class="m-hd"><h3>Insights</h3></div>
+    <div class="m-lbl">This year you'll spend</div>
+    <div class="m-big">$1,019</div>
+    <div class="m-bars"><i style="height:40%"></i><i style="height:52%"></i><i style="height:46%"></i><i style="height:60%"></i><i style="height:55%"></i><i style="height:70%"></i><i class="hi" style="height:85%"></i><i style="height:60%"></i><i style="height:64%"></i><i style="height:58%"></i><i style="height:66%"></i><i style="height:72%"></i></div>
+    <div class="m-sect">Price increases</div>
+    <div class="m-card" style="margin-top:0">${tile('#E50914','▚')}<div style="flex:1"><div class="m-nm" style="font-size:26px">Netflix is up 12% since you subscribed</div></div><div class="m-pr" style="color:#FF8A80">+12%</div></div>` },
+
+  { cap:`Cancel what you <em>don't use</em>`, sub:`And watch your savings grow`, body:`
+    <div class="m-hd"><h3>Cancelled</h3></div>
+    <div class="m-card" style="flex-direction:column;align-items:flex-start;margin-top:40px;padding:40px 34px">
+      <div class="m-lbl" style="margin:0">Saved so far</div>
+      <div class="m-big lime" style="margin:10px 0 0">$240.00</div>
+      <div class="m-dt" style="margin-top:6px">from 3 cancelled subscriptions</div></div>
+    <div class="m-card">${tile('#9146FF','▶')}<div><div class="m-nm">Twitch Sub</div><div class="m-dt">saved $5.99/mo</div></div></div>
+    <div class="m-card">${tile('#FE3C72','♥')}<div><div class="m-nm">Tinder Gold</div><div class="m-dt">saved $24.99/mo</div></div></div>` },
+];
+
+const wrap = document.getElementById('assets');
+SHOTS.forEach((s,i)=>{
+  const html = `<div class="asset">
+    <div class="lbl">Screenshot ${i+1} — 1080×1920 <button onclick="dl('shot${i}','subtrack-screenshot-${i+1}.png')">Download PNG</button></div>
+    <div class="stage-wrap"><div class="shot" id="shot${i}">
+      <div class="cap"><h2>${s.cap}</h2><p>${s.sub}</p></div>
+      <div class="phone"><div class="scr">${s.body}</div></div>
+    </div></div></div>`;
+  wrap.insertAdjacentHTML('beforeend', html);
+});
+
+// feature graphic
+wrap.insertAdjacentHTML('beforeend', `<div class="asset">
+  <div class="lbl">Feature graphic — 1024×500 <button onclick="dl('feat','subtrack-feature.png')">Download PNG</button></div>
+  <div class="feat-wrap"><div class="feat" id="feat">
+    <div class="txt"><span class="badge">SUBSCRIPTION TRACKER</span>
+      <h2>Know what you <em>really</em> pay</h2>
+      <p>Track subscriptions · get renewal reminders · cancel what you don't use</p></div>
+    <div class="ring"><b><span class="n">$84.97</span><span class="s">/ month</span></b></div>
+  </div></div></div>`);
+
+function dl(id, name){
+  const node = document.getElementById(id);
+  html2canvas(node, {backgroundColor:null, scale:1, width:node.offsetWidth, height:node.offsetHeight, useCORS:true})
+    .then(canvas => { const a=document.createElement('a'); a.href=canvas.toDataURL('image/png'); a.download=name; a.click(); });
+}
+async function dlAll(){
+  for (let i=0;i<SHOTS.length;i++){ dl('shot'+i,'subtrack-screenshot-'+(i+1)+'.png'); await new Promise(r=>setTimeout(r,600)); }
+  dl('feat','subtrack-feature.png');
+}
+</script>
+</body>
+</html>
