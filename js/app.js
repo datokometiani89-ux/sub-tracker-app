@@ -69,6 +69,8 @@
 
   /* --- boot --- */
   ST.load();
+  ST.state.meta.opens = (ST.state.meta.opens || 0) + 1;   // session count → gates rating prompt
+  ST.save();
   ST.advanceBilling();
   ST.fetchRates();   // async; re-renders when fresh FX rates land
   window.addEventListener("hashchange", ST.render);

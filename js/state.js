@@ -16,7 +16,7 @@
     pro: { active:false, plan:null, since:null },
     // account: null = guest (local-only). emails[] = linked & verified identities.
     account: null,  // { id, name, primaryEmail, provider, emails:[{address,provider,verified,addedAt}], backedUpAt }
-    meta: { installedAt: new Date().toISOString(), onboarded:false, lastNotifCheck:null },
+    meta: { installedAt: new Date().toISOString(), onboarded:false, lastNotifCheck:null, opens:0, ratePrompted:false },
   });
 
   ST.load = () => {

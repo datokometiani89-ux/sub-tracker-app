@@ -4,6 +4,39 @@
   ST.screens = {};
   const t = (...a)=>ST.t(...a), esc=s=>ST.esc(s), icon=(...a)=>ST.icon(...a);
 
+  /* ---- in-app rating prompt (ASO: reviews are the #1 Play ranking factor) ----
+     Asked once, only after a delight moment + real usage. Happy → store, unhappy → private feedback. */
+  ST.RATE = {
+    playUrl: "https://play.google.com/store/apps/details?id=com.subtrack.app",
+    contact: "dato.kometiani89@gmail.com",
+  };
+  ST.maybeAskRating = () => {
+    const m = ST.state.meta;
+    if (m.ratePrompted) return;                      // ask once ever
+    if (ST.activeSubs().length < 3) return;          // real usage
+    if ((m.opens || 0) < 2) return;                  // not on first session
+    m.ratePrompted = true; ST.save();
+    ST.sheet(`
+      <div class="dhead" style="padding-top:8px">
+        <div style="font-size:30px;letter-spacing:6px;color:var(--lime)">★★★★★</div>
+        <h2 style="font-size:19px;margin-top:4px">${t("rateTitle")}</h2>
+        <div class="cat">${t("rateSub")}</div>
+      </div>
+      <div class="form">
+        <button class="cta" style="position:static;width:100%" id="rLove">${t("rateLove")}</button>
+        <button class="cta ghost" style="position:static;width:100%" id="rMeh">${t("rateMeh")}</button>
+        <button style="color:var(--dim);font-size:13px;width:100%;margin-top:2px" id="rLater">${t("rateLater")}</button>
+      </div>
+    `, w => {
+      w.querySelector("#rLove").onclick = () => { window.open(ST.RATE.playUrl, "_blank"); ST.closeSheets(); ST.toast(t("rateThanks")); };
+      w.querySelector("#rMeh").onclick  = () => {
+        window.open("mailto:"+ST.RATE.contact+"?subject="+encodeURIComponent("SubTrack feedback"), "_blank");
+        ST.closeSheets();
+      };
+      w.querySelector("#rLater").onclick = () => ST.closeSheets();
+    });
+  };
+
   /* minimal RFC-4180 CSV parser (quotes, escaped quotes, CRLF) */
   const parseCSV = (txt) => {
     const rows = [[]]; let f = "", q = false;
@@ -332,6 +365,7 @@
         ST.save(); ST.closeSheets(); ST.toast(t("added"));
         ST.askNotifPermission();
         location.hash = "#/";
+        setTimeout(ST.maybeAskRating, 1200);
       };
     });
   };
@@ -423,6 +457,7 @@
         ST.save(); ST.toast(t("added"));
         ST.askNotifPermission();
         location.hash = "#/";
+        setTimeout(ST.maybeAskRating, 1200);
       };
     });
   };
@@ -495,6 +530,7 @@
         ST.confetti();
         ST.toast(t("savedNow",{v:ST.fmtMoney(ST.monthlyBase(s))}));
         setTimeout(()=>location.hash="#/", 900);
+        setTimeout(ST.maybeAskRating, 1800);   // ask after the celebration
       };
       root.querySelector("#dDel").onclick = () => {
         if (!confirm(t("confirmDelete"))) return;
@@ -720,6 +756,7 @@
             }
             ST.save(); ST.toast(t("importedN",{n})); ST.askNotifPermission();
             location.hash = "#/";
+            setTimeout(ST.maybeAskRating, 1200);
           };
         };
         draw();

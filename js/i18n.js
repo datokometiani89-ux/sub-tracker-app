@@ -158,6 +158,13 @@
     importNone:{en:"Nothing found. Paste more text, or add manually.",ru:"Ничего не найдено. Вставьте больше текста или добавьте вручную.",es:"Nada encontrado. Pega más texto o añade manualmente."},
     importAddN:{en:"Add {n} selected",ru:"Добавить выбранные: {n}",es:"Añadir {n} seleccionadas"},
 
+    rateTitle:{en:"Enjoying SubTrack?",ru:"Нравится SubTrack?",es:"¿Te gusta SubTrack?",pt:"Curtindo o SubTrack?",de:"Gefällt dir SubTrack?",fr:"Tu aimes SubTrack ?",tr:"SubTrack'i beğendin mi?"},
+    rateSub:{en:"A quick rating helps other people find it.",ru:"Оценка помогает другим найти приложение.",es:"Una valoración ayuda a que otros lo encuentren.",pt:"Uma avaliação ajuda outros a encontrá-lo.",de:"Eine Bewertung hilft anderen, die App zu finden.",fr:"Une note aide les autres à le trouver.",tr:"Bir puan başkalarının bulmasına yardımcı olur."},
+    rateLove:{en:"I love it",ru:"Нравится",es:"Me encanta",pt:"Adorei",de:"Ich mag sie",fr:"J'adore",tr:"Bayıldım"},
+    rateMeh:{en:"Could be better",ru:"Могло быть лучше",es:"Podría mejorar",pt:"Poderia melhorar",de:"Geht besser",fr:"Peut mieux faire",tr:"Daha iyi olabilir"},
+    rateLater:{en:"Not now",ru:"Не сейчас",es:"Ahora no",pt:"Agora não",de:"Nicht jetzt",fr:"Pas maintenant",tr:"Şimdi değil"},
+    rateThanks:{en:"Thank you! 🙏",ru:"Спасибо! 🙏",es:"¡Gracias! 🙏",pt:"Obrigado! 🙏",de:"Danke! 🙏",fr:"Merci ! 🙏",tr:"Teşekkürler! 🙏"},
+
     account:{en:"Account",ru:"Аккаунт",es:"Cuenta",pt:"Conta",de:"Konto",fr:"Compte",tr:"Hesap"},
     signIn:{en:"Sign in",ru:"Войти",es:"Iniciar sesión",pt:"Entrar",de:"Anmelden",fr:"Se connecter",tr:"Giriş yap"},
     signOut:{en:"Sign out",ru:"Выйти",es:"Cerrar sesión",pt:"Sair",de:"Abmelden",fr:"Se déconnecter",tr:"Çıkış yap"},
